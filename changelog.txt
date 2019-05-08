@@ -1,0 +1,33 @@
+
+
+
+
+
+===============================================================================
+5/7/2019
+-added helper.py
+ -created copyright()
+  this quickly prints copyright info
+
+-added gamestate.py
+ -created GameState class
+ -GameState currently has one attribute: 
+  board (the array storing the state of the game field)
+ -printout method
+  currently prints board directly to console
+ -board config
+  allows changing of amount of rows or columns without 
+  changing global constants ROWS or COLUMNS
+
+-added tetrimino.py
+ -created Tetrinimo class
+ 
+Things to add:
+-Some way of handling the position of a tetrimino...
+-Putting a tetrimino inside the board...
+-Changing printout so it returns a string which can be checked by unit testing
+-Adding a unit test module to handle basic spawning
+
+All changes made by Kevin Huang
+
+
