@@ -4,15 +4,15 @@
 
 
 
-from tetrimino import Tetrinimo
+from tetrimino import Tetrimino
 
-ROWS = 24 #20 for the actual well, 4 for the buffer zone
+ROWS = 22 #20 for the actual well, 2 for the buffer zone
 COLUMNS = 10 #default width
 
 
 class GameState:
     def __init__(self):
-        self.board = [['   ' for i in range(COLUMNS)] for j in range(ROWS)]
+        self.board = [[' * ' for i in range(COLUMNS)] for j in range(ROWS)]
 
 
     def board_config(self, columns, rows):
@@ -25,22 +25,27 @@ class GameState:
         self.gameboard = [['   ' for i in range(columns)] for j in range(rows)]
     
     def printout(self):
-        #try to make this so that this returns a string that we can check using a unit test...
-        for i in range(len(self.board)):
-            for j in range(len(self.board[i])):
-                print(self.board[i][j])
-            print()
+        '''
+        creates a string representation of the board
+        '''
+        return   '\n'.join([ ''.join([self.board[i][j] for j in range(len(self.board[i]))]) for i in range(len(self.board)) ])
 
     def spawn(self):
-        #this should somehow update the board with a Tetrinimo object and 
-        pass
+
+        #initializes Tetrimino object
+        block = Tetrimino()
+        block.spawn()
+
+        #replaces stars with letters symbolizing block type
+        for x,y in [block.block1, block.block2, block.block3, block.block4]:
+            self.board[x][y] = ' {} '.format(block.block_type)
 
         
 
+
 a = GameState()
+a.spawn()
 print(a.printout())
-
-
 
     
             

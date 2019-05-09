@@ -1,9 +1,37 @@
+===========================================================================================
+5/8/2019
+-tetrimino.py
+ -added the following methods to Tetrimino class:
+  o_block() - creates coordinates and reinitializes block(1-4) attributes
+              to those coordinates
+  i_block() 
+  t_block()
+  l_block()
+  j_block()
+  s_block()
+  z_block()
+  spawn() - checks block type before using the methods above to reinitialize 
+            block1, block2, block3, block4 attributes to coordinates
 
+-gamestate.py
+ -added to the following methods in GameState class:
+  -printout()
+   -now returns a string representation of the board using a nested list comprehension
+  -spawn()
+   -now mutates the list stored in the board attribute with a newly spawned block...
+ 
+Things to add:
+-Adding a unittest module 
+-Perhaps make the spawn method in GameState some sort of general update method
+ -for example, mutating the GameState's board attribute based on the 
+  current values of the Tetromino's block1, block2 attributes 
+-Implementing side-to-side movement
+-Implementing gravity
+-Maybe rotation
 
+All changes made by Kevin Huang
 
-
-
-===============================================================================
+===============================================================================================
 5/7/2019
 -added helper.py
  -created copyright()
