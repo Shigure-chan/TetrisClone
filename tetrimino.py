@@ -170,3 +170,15 @@ class Tetrimino():
 
         elif self.block_type == 'Z':
             self.z_block()
+
+    
+                
+
+
+
+
+
+
+
+
+                

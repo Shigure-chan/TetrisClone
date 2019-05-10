@@ -1,3 +1,32 @@
+5/10/19
+-gamestate.py
+ -added the following methods in GameState class:
+  -move_right()
+   -moves each block in an Tetrimino object 1 column right
+  -move_left()
+   -moves each block in a Tetrimion object 1 column left
+  -gravity()
+   -moves each block in an Tetrimino object 1 row down...
+  -board_update()
+   -updates board by wiping every index that the current Tetrimino object
+    isn't in (this must be changed...)
+
+  -updated the following methods in GameState class:
+   -spawn()
+    -does not update board anymore, all it does is initialize
+     the block attribute to an Tetrimino object.
+ 
+ -created a if __name__ == '__main__' block for testing purposes...
+
+Things to add:
+-board_update must be modified such that it doesn't "destroy" an existing block 
+ when a new block is added
+-implementing rotation
+-modifying the movement such that the current tetrimino doesn't occupy 
+ an space already occupied by an existing block...
+
+All changes made by Kevin Huang
+
 ===========================================================================================
 5/8/2019
 -tetrimino.py
