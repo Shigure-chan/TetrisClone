@@ -14,6 +14,7 @@ class GameState:
     def __init__(self):
         self.board = [[' * ' for i in range(COLUMNS)] for j in range(ROWS)]
         self.block = None
+        self.existing_blocks = [] #a list of tetromino objects
 
 
     def board_config(self, columns, rows):
@@ -38,6 +39,7 @@ class GameState:
 
         #initializes Tetrimino object
         self.block = Tetrimino()
+        self.existing_blocks.append(self.block)
         self.block.spawn()
 
         '''
@@ -48,14 +50,23 @@ class GameState:
 
     def board_update(self):
         '''
-        when a tetrinimo objecct is active and another one spawns, the first one disappears...
+        when a tetrinimo object is active and another one spawns, the first one disappears...
         '''
         for i in range(ROWS):
             for j in range(COLUMNS):
-                if [i, j] in [self.block.block1, self.block.block2, self.block.block3, self.block.block4]:
-                    self.board[i][j] = ' {} '.format(self.block.block_type)
-                else:
                     self.board[i][j] = ' * '
+
+        if self.block:
+            for i in self.existing_blocks:
+                for [j, k] in [i.block1, i.block2, i.block3, i.block4]:
+                    if i.landed == False and i.frozen == False:
+                        self.board[j][k] = '|{}|'.format(i.block_type)
+                        
+                    elif i.landed == True and i.frozen == False:
+                        self.board[j][k] = '[{}]'.format(i.block_type)
+                        
+                    elif i.landed == True and i.frozen == True:
+                        self.board[j][k] = ' {} '.format(i.block_type)
 
     def move_right(self):
         '''
@@ -69,7 +80,7 @@ class GameState:
         '''
         possible = all(map(lambda x:  0 <= x[1] < 9, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
         
-        if possible:
+        if self.block.frozen == False and possible:
             self.block.block1[1] += 1
             self.block.block2[1] += 1
             self.block.block3[1] += 1
@@ -87,7 +98,7 @@ class GameState:
         '''
         possible = all(map(lambda x:  0 < x[1] <= 9, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
 
-        if possible:
+        if self.block.frozen == False and possible:
             self.block.block1[1] -= 1
             self.block.block2[1] -= 1
             self.block.block3[1] -= 1
@@ -101,13 +112,29 @@ class GameState:
         We will eventually need to check what will happen if a block is right below another...
         '''
 
-        possible = any(map(lambda x: 1 <= x[0]+1 < 21, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
-
+        possible = all(map(lambda x: 1 <= x[0]+1 < 21, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
+        print(self.block.block1, self.block.landed, self.block.frozen)
         if possible:
             self.block.block1[0] += 1
             self.block.block2[0] += 1
             self.block.block3[0] += 1
             self.block.block4[0] += 1
+
+        elif not possible:
+            if self.block.landed == True:
+                self.block.frozen = True
+                
+            elif self.block.landed == False:
+                self.block.landed = True
+                self.block.block1[0] += 1
+                self.block.block2[0] += 1
+                self.block.block3[0] += 1
+                self.block.block4[0] += 1
+                
+                
+
+            
+            
 
 
 if __name__ == '__main__':

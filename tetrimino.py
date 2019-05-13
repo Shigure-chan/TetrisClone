@@ -24,6 +24,9 @@ class Tetrimino():
         self.block2 = [0,0]
         self.block3 = [0,0]
         self.block4 = [0,0]
+
+        self.landed = False
+        self.frozen = False
         
     def o_block(self):
         '''

@@ -1,3 +1,24 @@
+5/13/19
+-gamestate.py
+ -added following attributes to GameState Class:
+  -existing_blocks
+   -is a list of all block objects that have existed...
+   -implemented so previous blocks wouldn't be overwritten...
+ -modified gravity method to incorporate freezing and landing mechanics
+-tetrimino.py
+ -added following attributes to the Tetrimino:
+  -frozen - activates a tick after landing (only works with bottom for now)
+  -landed - activates upon landing (only works with the bottom for now)
+
+Things to add:
+ -implementing rotation
+ -modifying the movement such that the current tetrimino doesn't occupy 
+  an space already occupied by an existing block...
+
+All changes made by Kevin Huang
+
+=======================================================================================
+
 5/10/19
 -gamestate.py
  -added the following methods in GameState class:
