@@ -6,7 +6,7 @@
 
 from tetrimino import Tetrimino
 
-ROWS = 22 #20 for the actual well, 2 for the buffer zone
+ROWS = 22 #20 for the actual well, first 2 for the buffer zone
 COLUMNS = 10 #default width
 
 
@@ -30,7 +30,7 @@ class GameState:
         '''
         creates a string representation of the board
 
-        keep in mind that this still shows the buffer zone
+        keep in mind that this still shows the buffer zone... 
         
         '''
         return   '\n'.join([ ''.join([self.board[i][j] for j in range(len(self.board[i]))]) for i in range(len(self.board)) ])
@@ -80,7 +80,7 @@ class GameState:
         '''
         possible = all(map(lambda x:  0 <= x[1] < 9, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
         
-        if self.block.frozen == False and possible:
+        if self.block.frozen == False and self.nothing_right() and possible:
             self.block.block1[1] += 1
             self.block.block2[1] += 1
             self.block.block3[1] += 1
@@ -98,7 +98,7 @@ class GameState:
         '''
         possible = all(map(lambda x:  0 < x[1] <= 9, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
 
-        if self.block.frozen == False and possible:
+        if self.block.frozen == False and self.nothing_left() and possible:
             self.block.block1[1] -= 1
             self.block.block2[1] -= 1
             self.block.block3[1] -= 1
@@ -113,24 +113,100 @@ class GameState:
         '''
 
         possible = all(map(lambda x: 1 <= x[0]+1 < 21, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
-        print(self.block.block1, self.block.landed, self.block.frozen)
-        if possible:
+        #print([self.block.block1, self.block.block2, self.block.block3, self.block.block4])
+        #print(self.nothing_below())
+        
+        if possible and self.nothing_below():
             self.block.block1[0] += 1
             self.block.block2[0] += 1
             self.block.block3[0] += 1
             self.block.block4[0] += 1
 
-        elif not possible:
+        else:
             if self.block.landed == True:
                 self.block.frozen = True
                 
             elif self.block.landed == False:
                 self.block.landed = True
-                self.block.block1[0] += 1
-                self.block.block2[0] += 1
-                self.block.block3[0] += 1
-                self.block.block4[0] += 1
                 
+                if self.nothing_below():
+                    self.block.block1[0] += 1
+                    self.block.block2[0] += 1
+                    self.block.block3[0] += 1
+                    self.block.block4[0] += 1
+
+    def nothing_below(self) -> bool:
+        '''
+        determines whether there is a block that is in the way of the current block falling down...
+
+        the nothing_below method will work like this...
+
+        it will take a list of current block coordinates and add 1 to the row values..
+        if one of the coordinates in the resultant list is in the list of current block coordinates, those values are deleted...
+        this keeps this method flexible, especially for when blocks rotate
+        
+        o-block
+        [ [1,0], [1,1], [2,0], [2,1] ] -> [ [2,0], [2, 1], [3, 0], [3,1] ] -> [ [3,0], [3,1] ]
+
+        if there is, it returns True, else False
+        '''
+        indexes_below = [ [i[0]+1, i[1]] for i in [self.block.block1, self.block.block2, self.block.block3, self.block.block4]\
+                          if [i[0]+1, i[1]] not in [self.block.block1, self.block.block2, self.block.block3, self.block.block4] ]
+
+        for x,y in indexes_below:
+            if x != ROWS and self.board[x][y] != ' * ':
+                return False
+        else:
+            return True
+        
+
+    def nothing_right(self) -> bool:
+        '''
+        should work similarily to nothing_below
+        '''
+        indexes_right = [ [i[0], i[1]+1] for i in [self.block.block1, self.block.block2, self.block.block3, self.block.block4]\
+                          if [i[0], i[1]+1] not in [self.block.block1, self.block.block2, self.block.block3, self.block.block4] ]
+
+        for x,y in indexes_right:
+            if y != COLUMNS and self.board[x][y] != ' * ':
+                return False
+        else:
+            return True
+
+    def nothing_left(self) -> bool:
+        '''
+        should work similarily to nothing_below
+        '''
+        indexes_right = [ [i[0], i[1]-1] for i in [self.block.block1, self.block.block2, self.block.block3, self.block.block4]\
+                          if [i[0], i[1]-1] not in [self.block.block1, self.block.block2, self.block.block3, self.block.block4] ]
+
+        for x,y in indexes_right:
+            if y != COLUMNS and self.board[x][y] != ' * ':
+                return False
+        else:
+            return True
+
+    def line_clear(self):
+        '''
+        REQUIRES TESTING!!!!!!
+        replaces any rows full of only letters (nested lists) stored in self.board with rows of clear_strings
+        '''
+        
+        clear_string = '#*#'
+
+        
+        for i in range(len(self.board)):
+            if ' * ' not in self.board[i]:
+                self.board[i] = [clear_string] * COLUMNS
+
+    def rotation(self):
+        '''
+        
+        '''
+        pass
+    
+        
+                    
                 
 
             
@@ -181,6 +257,11 @@ if __name__ == '__main__':
                 a.board_update()
                 print(a.printout())
                 print()
+
+            elif test == 'printout':
+                print(a.board)
+                print()
+
                 
         
 

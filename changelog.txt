@@ -1,3 +1,43 @@
+5/26/19
+-gamestate.py
+ -added following methods:
+  -nothing_below
+   -returns bool that detects whether spaces below are empty
+    now modified such that it detects spaces below the bottom blocks 
+    instead of all blocks in the current tetrimino
+  -nothing_right
+   -similar principle as nothing_below
+  -nothing_left
+   -ditto
+  -rotation
+   -still need to conceptualize it...
+
+Things to add:
+ -implement a simple rotation alogrithm
+  -write down notes on Tetris's actual implementation
+ -a module to unit test Tetris
+
+All changes made by Kevin Huang
+  
+==================================================================================
+5/15/19
+-gamestate.py
+ -started progress on the nothing_below method
+ -nothing_below will return a bool that detects whether the spaces
+  below the current tetrimino is empty. if empty, the tetrimino can
+  fall into those squares; otherwise, it lands, then freezes...
+ -nothing_right and nothing_left will work similarily...
+ 
+Things to add:
+ -implementing rotation
+ -changing gravity so that the current tetrimino dosn't override existing
+  blocks
+ -perhaps change possible to a method that returns a bool and rewrite it
+  so that it's more readable and concise...
+
+All changes made by Kevin Huang
+ 
+======================================================================================
 5/13/19
 -gamestate.py
  -added following attributes to GameState Class:
