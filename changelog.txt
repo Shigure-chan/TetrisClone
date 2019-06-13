@@ -1,6 +1,53 @@
+6/12/19
+-added new module:
+ -testsuite.py
+-wrote documentation for i block in GameState.py
+-look into rotation matrices to avoid hardcoding every rotation in the game...
+ -also consider reviewing Linear Algebra... Because that was embarassing...
+
+-gamestate.py
+ -revamped following methods to use methods in tetrimino...
+  -move_right
+  -move_left
+  -gravity
+  -nothing_below
+  -nothing_right
+  -nothing_left
+   -all these new methods are using the new methods added to the Tetrimino class...
+
+ -added following methods to Tetrimino() (tetrimino.py) for unittest/modularity
+  -set_type
+   -allows one to change the type of the block
+  -rotate
+   -allows one to go between the different rotational phases
+  -position_blocks
+   -allows one to position blocks using block1 as a reference
+  -fall_down
+   -adds 1 to the row index of each sub-block
+  -move_left
+   -subtracts 1 from the col index of each sub-block
+  -move_right
+   -adds 1 to the col index of each sub_block
+  -indexes_below
+   -generates a list of indexes directly below each sub-block (that doesn't refer to a sub-block)
+  -indexes_right
+   -ditto
+  -indexes_left
+   -ditto
+
+
+Things to add:
+-Finish writing notes for every rotation combination...
+-Read up on rotational matrices...
+-Revamp unit tests for those different rotation possibilities
+-Create appropriate helper methods or functions as needed to implement a rotation algorithm
+
+
+
+=======================================================================================
 5/26/19
 -gamestate.py
- -added following methods:
+ -added following methods in GameState class:
   -nothing_below
    -returns bool that detects whether spaces below are empty
     now modified such that it detects spaces below the bottom blocks 
@@ -58,7 +105,6 @@ Things to add:
 All changes made by Kevin Huang
 
 =======================================================================================
-
 5/10/19
 -gamestate.py
  -added the following methods in GameState class:

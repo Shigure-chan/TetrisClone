@@ -11,10 +11,21 @@ COLUMNS = 10 #default width
 
 
 class GameState:
+    ROWS = 22
+    COLUMNS = 10
+
     def __init__(self):
-        self.board = [[' * ' for i in range(COLUMNS)] for j in range(ROWS)]
+        self.board = [[' * ' for i in range(self.COLUMNS)] for j in range(self.ROWS)]
         self.block = None
         self.existing_blocks = [] #a list of tetromino objects
+
+    def block_pieces(self) -> {str:[int, int]}:
+        '''
+        returns a dict of the coordinates for easy access
+        '''
+        assert type(self.block) == Tetrimino, 'GameState.block_pieces: self.block is not a Tetrimino object'
+        return self.block.blocks
+
 
 
     def board_config(self, columns, rows):
@@ -23,10 +34,12 @@ class GameState:
         #Assertion errors are raised so somebody doesn't try to make a board with negative rows and columns...
         assert type(columns) == int and rows >= 4, ('GameState.board_config: columns({}) is not a int that is at least 4'.format(columns))
         assert type(rows) == int and columns >= 4, ('GameState.board_config: rows({}) is not a int that is at least 4'.format(rows))
+        self.COLUMNS = columns
+        self.ROWS = rows
         
-        self.gameboard = [['   ' for i in range(columns)] for j in range(rows)]
+        self.board = [[' * ' for i in range(self.COLUMNS)] for j in range(ROWS)]
     
-    def printout(self):
+    def printout(self) -> str:
         '''
         creates a string representation of the board
 
@@ -42,23 +55,19 @@ class GameState:
         self.existing_blocks.append(self.block)
         self.block.spawn()
 
-        '''
-        #replaces stars with letters symbolizing block type
-        for x,y in [self.block.block1, self.block.block2, self.block.block3, self.block.block4]:
-            self.board[x][y] = ' {} '.format(self.block.block_type)
-        '''
+       
 
     def board_update(self):
         '''
         when a tetrinimo object is active and another one spawns, the first one disappears...
         '''
-        for i in range(ROWS):
-            for j in range(COLUMNS):
+        for i in range(self.ROWS):
+            for j in range(self.COLUMNS):
                     self.board[i][j] = ' * '
 
         if self.block:
             for i in self.existing_blocks:
-                for [j, k] in [i.block1, i.block2, i.block3, i.block4]:
+                for j, k in i.blocks.values():
                     if i.landed == False and i.frozen == False:
                         self.board[j][k] = '|{}|'.format(i.block_type)
                         
@@ -78,13 +87,13 @@ class GameState:
         Perhaps we can mark them as a gray block.
 
         '''
-        possible = all(map(lambda x:  0 <= x[1] < 9, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
+        
+        dct = self.block_pieces()
+
+        possible = all(map(lambda x:  0 <= x[1] < 9, [dct[i] for i in sorted(dct)]))
         
         if self.block.frozen == False and self.nothing_right() and possible:
-            self.block.block1[1] += 1
-            self.block.block2[1] += 1
-            self.block.block3[1] += 1
-            self.block.block4[1] += 1
+            self.block.move_right()
 
     def move_left(self):
         '''
@@ -96,13 +105,12 @@ class GameState:
         Perhaps we can mark them as a gray block.
 
         '''
-        possible = all(map(lambda x:  0 < x[1] <= 9, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
+        dct = self.block_pieces()
+
+        possible = all(map(lambda x:  0 < x[1] <= 9, [dct[i] for i in sorted(dct)]))
 
         if self.block.frozen == False and self.nothing_left() and possible:
-            self.block.block1[1] -= 1
-            self.block.block2[1] -= 1
-            self.block.block3[1] -= 1
-            self.block.block4[1] -= 1
+            self.block.move_left()
 
     def gravity(self):
         '''
@@ -111,16 +119,14 @@ class GameState:
 
         We will eventually need to check what will happen if a block is right below another...
         '''
+        dct = self.block_pieces()
 
-        possible = all(map(lambda x: 1 <= x[0]+1 < 21, [self.block.block1, self.block.block2, self.block.block3, self.block.block4]))
+        possible = all(map(lambda x: 1 <= x[0]+1 < 21, [dct[i] for i in sorted(dct)]))
         #print([self.block.block1, self.block.block2, self.block.block3, self.block.block4])
         #print(self.nothing_below())
         
         if possible and self.nothing_below():
-            self.block.block1[0] += 1
-            self.block.block2[0] += 1
-            self.block.block3[0] += 1
-            self.block.block4[0] += 1
+            self.block.fall_down()
 
         else:
             if self.block.landed == True:
@@ -130,10 +136,7 @@ class GameState:
                 self.block.landed = True
                 
                 if self.nothing_below():
-                    self.block.block1[0] += 1
-                    self.block.block2[0] += 1
-                    self.block.block3[0] += 1
-                    self.block.block4[0] += 1
+                    self.block.fall_down()
 
     def nothing_below(self) -> bool:
         '''
@@ -150,10 +153,8 @@ class GameState:
 
         if there is, it returns True, else False
         '''
-        indexes_below = [ [i[0]+1, i[1]] for i in [self.block.block1, self.block.block2, self.block.block3, self.block.block4]\
-                          if [i[0]+1, i[1]] not in [self.block.block1, self.block.block2, self.block.block3, self.block.block4] ]
 
-        for x,y in indexes_below:
+        for x,y in self.block.indexes_below():
             if x != ROWS and self.board[x][y] != ' * ':
                 return False
         else:
@@ -164,10 +165,8 @@ class GameState:
         '''
         should work similarily to nothing_below
         '''
-        indexes_right = [ [i[0], i[1]+1] for i in [self.block.block1, self.block.block2, self.block.block3, self.block.block4]\
-                          if [i[0], i[1]+1] not in [self.block.block1, self.block.block2, self.block.block3, self.block.block4] ]
-
-        for x,y in indexes_right:
+        
+        for x,y in self.block.indexes_right():
             if y != COLUMNS and self.board[x][y] != ' * ':
                 return False
         else:
@@ -177,10 +176,8 @@ class GameState:
         '''
         should work similarily to nothing_below
         '''
-        indexes_right = [ [i[0], i[1]-1] for i in [self.block.block1, self.block.block2, self.block.block3, self.block.block4]\
-                          if [i[0], i[1]-1] not in [self.block.block1, self.block.block2, self.block.block3, self.block.block4] ]
-
-        for x,y in indexes_right:
+        
+        for x,y in self.block.indexes_left():
             if y != COLUMNS and self.board[x][y] != ' * ':
                 return False
         else:
@@ -199,11 +196,7 @@ class GameState:
             if ' * ' not in self.board[i]:
                 self.board[i] = [clear_string] * COLUMNS
 
-    def rotation(self):
-        '''
-        
-        '''
-        pass
+    
     
         
                     
