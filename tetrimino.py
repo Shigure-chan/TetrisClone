@@ -1,5 +1,9 @@
 #Kevin Huang
 
+#eventually return the indexes so we can check whether the rotation is valid and implement wall kicks...
+#need to fix the t/i block
+
+
 from random import choice
 
 class Tetrimino():
@@ -33,11 +37,8 @@ class Tetrimino():
         '''
         
         self.block_type = choice(['I', 'O', 'T', 'S', 'Z', 'J', 'L'])
-        self.orientation = '0'
-        self.rotation_phases = ['0', 'R', '2', 'L']
-
-
-        
+        self.phase_index = 0
+        self.rotation_phases = ['0', 'R', '2', 'L']        
         
         self.blocks = {'block1' : [0,0], 'block2' : [0,0], 'block3' : [0,0], 'block4' : [0,0]}
 
@@ -52,12 +53,43 @@ class Tetrimino():
         assert type_str in ['I', 'O', 'T', 'S', 'Z', 'J', 'L'], f'Tetrimino.set_type: type_str(\'{type_str}\') must be either \'I\', \'O\', \'T\', \'S\', \'Z\', \'J\', \'L\''
         self.blocktype = type_str
     
-    def rotate(self, orientation):
+    def rotate(self, value):
         '''
-        allows you to go between different states of rotation
+        changes 'phase_index' by a value of 1 - equivalent to a 90 degree rotation clockwise
+        -1 is equivalent to a 90 degreee rotation in the opposite direction...
+
         '''
-        assert orientation in ['0', 'R', '2', 'L'], f'Tetrimino.rotate: orientation(\'{orientation}\') must be either \'0\', \'R\', \'2\', \'L\''
-        self.rotation = orientation
+        assert value in [-1, 0, 1], f'Tetrimino.rotate: value({value}) should be either -1, 0, or 1'
+        
+        if self.block_type == 'I':
+            self.i_rotation(value) 
+            
+        elif self.block_type == 'O':
+            pass #o literally does not rotate
+            
+        elif self.block_type == 'T':
+            self.t_rotation(value)
+
+        elif self.block_type == 'S':
+            self.s_rotation(value)
+            
+        elif self.block_type == 'Z':
+            self.z_rotation(value)
+            
+        elif self.block_type == 'J':
+            self.j_rotation(value)
+
+        elif self.block_type == 'L':
+            self.l_rotation(value)
+
+            
+    
+    def orientation(self):
+        '''
+        returns the current orientation of the block
+        '''
+        return self.rotation_phases[self.phase_index]
+    
 
     def position_blocks(self, row, col):
         '''
@@ -149,72 +181,7 @@ class Tetrimino():
         [ ][ ][ ][ ]
         [ ][ ][ ][ ]
 
-        0 -> L
-        4 is pushed up 1 and 2 to the left
-        3 is pushed          1 to the left 
-        2 is pushed down 1
-        1 is pushed down 2 and 1 to the right
-
-        0 -> R
-        4 is pushed down 2 and 1 to the left
-        3 is pushed down 1
-        2 is pushed up 1 and 1 to the right
-        1 is pushed up 1 and 2 to the right
-
-        State R
-        [ ][ ][1][ ]
-        [ ][ ][2][ ]
-        [ ][ ][3][ ]
-        [ ][ ][4][ ]
-
-        R -> 0
-        4 is pushed up 2 and 1 to the right
-        3 is pushed up 1
-        2 is pushed          1 to the left
-        1 is pushed down 1 and 2 to the left
-
-        R -> 2
-        4 is pushed up 1 and 2 to the left
-        3 is pushed up 1 and 1 to the left
-        2 is pushed down 1 
-        1 is pushed down 2 and 1 to the right
-
-        State 2
-        [ ][ ][ ][ ]
-        [ ][ ][ ][ ]
-        [4][3][2][1]
-        [ ][ ][ ][ ]
-
-        2 -> R
-        4 is pushed down 1 and 2 to the right
-        3 is pushed            1 to the right
-        2 is pushed up 1 
-        1 is pushed up 2 and 1 to the left
-
-        2 -> L
-        4 is pushed down 1 and 2 to the right
-        3 is pushed            1 to the right
-        2 is pushed up 1 
-        1 is pushed up 2 and 1 to the left
-
-        State L
-        [ ][4][ ][ ]
-        [ ][3][ ][ ]
-        [ ][2][ ][ ]
-        [ ][1][ ][ ]
-
-        L -> 2
-        4 is pushed down 2 and 1 to the left
-        3 is pushed down 1
-        2 is pushed right 1
-        1 is pushed up 1 and 2 to the right
-
-        L -> 0
-        4 is pushed down 1 and 2 to the right
-        3 is pushed            1 to the right
-        2 is pushed up 1
-        1 is pushed up 2 and 1 to the left
-        '''
+       '''
 
         self.blocks['block1'] = [ 0, choice(range(0,7)) ] #prevents it from spawning offscreen
         
@@ -224,6 +191,8 @@ class Tetrimino():
 
         return None #prevents recursion...
 
+    
+    
     def t_block(self):
         '''
         block1 is the left-most block when horizontal...
@@ -234,21 +203,6 @@ class Tetrimino():
         [ ][1][ ]
         [2][3][4]
         [ ][ ][ ]
- 
-        State R 
-        [ ][2][ ]
-        [ ][3][1]
-        [ ][4][ ]
-        
-        State 2
-        [ ][ ][ ]
-        [4][3][2]
-        [ ][1][ ]
-
-        State L
-        [ ][4][ ]
-        [1][3][ ]
-        [ ][2][ ]
         '''
         self.blocks['block1'] = [ 0, choice(range(1,9)) ] #prevents it from spawning offscreen
 
@@ -262,9 +216,26 @@ class Tetrimino():
         '''
         block1 is the right-most when spawned...
         spawns horizontally...
+
+        State 0
         [ ][ ][1]
         [4][3][2]
         [ ][ ][ ]
+
+        State R
+        [ ][4][ ]
+        [ ][3][ ]
+        [ ][2][1]
+
+        State 2 
+        [ ][ ][ ]
+        [2][3][4]
+        [1][ ][ ]
+
+        State L
+        [1][2][ ]
+        [ ][3][ ]
+        [ ][4][ ]
         
         '''
         self.blocks['block1'] = [ 0, choice(range(2, 10))]
@@ -279,9 +250,26 @@ class Tetrimino():
         '''
         block1 is the left-most when spawned...
         spawns horizontally...
+
+        State 0 
         [1][ ][ ]
         [2][3][4]
         [ ][ ][ ]
+
+        State R 
+        [ ][2][1]
+        [ ][3][ ]
+        [ ][4][ ]
+
+        State 2 
+        [ ][ ][ ]
+        [4][3][2]
+        [ ][ ][1]
+
+        State L 
+        [ ][4][ ]
+        [ ][3][ ]
+        [1][2][ ]
         
         '''
         self.blocks['block1'] = [ 0, choice(range(0, 8))]
@@ -296,9 +284,26 @@ class Tetrimino():
         '''
         block1 is the right-most when spawned...
         spawns horizontally...
+        
+        State 0
         [ ][2][1]
         [4][3][ ]
         [ ][ ][ ]
+
+        State R
+        [ ][4][ ]
+        [ ][3][2]
+        [ ][ ][1]
+
+        State 2
+        [ ][ ][ ]
+        [ ][3][4]
+        [1][2][ ]
+
+        State L
+        [1][ ][ ]
+        [2][3][ ]
+        [ ][4][ ]
         
         '''
         self.blocks['block1'] = [ 0, choice(range(2, 10))]
@@ -313,10 +318,26 @@ class Tetrimino():
         '''
         block1 is the left-most when spawned...
         spawns horizontally...
+
+        State 0
         [1][2][ ]
         [ ][3][4]
         [ ][ ][ ]
         
+        State R
+        [ ][ ][1]
+        [ ][3][2]
+        [ ][4][ ]
+
+        State 2
+        [ ][ ][ ]
+        [4][3][ ]
+        [ ][2][1]
+
+        State L
+        [ ][4][ ]
+        [2][3][ ]
+        [1][ ][ ]
         '''
         self.blocks['block1'] = [ 0, choice(range(0, 8))]
 
@@ -326,23 +347,6 @@ class Tetrimino():
 
         return None #prevents recursion...
 
-    def rotate_left(self):
-        '''
-        '''
-        pass
-    
-    
-    def rotate_right(self):
-        '''
-    
-        '''
-        if self.block_type in ['J', 'L', 'S', 'T', 'Z']:
-            pass
-        elif self.block_type == 'I':
-            
-            pass
-
-    
     
     def spawn(self):
         if self.block_type == 'O':
@@ -367,9 +371,716 @@ class Tetrimino():
             self.z_block()
 
     
-                
+    def i_rotation(self, value=1):
+        #basically read current phase
+
+        if self.phase_index == 0: #0 - '0'
+            '''
+                State 0
+                [ ][ ][ ][ ]
+                [1][2][3][4]
+                [ ][ ][ ][ ]
+                [ ][ ][ ][ ]
+
+                0 -> L
+                4 is pushed up 1 and 2 to the left
+                3 is pushed          1 to the left 
+                2 is pushed down 1
+                1 is pushed down 2 and 1 to the right
+
+                0 -> R
+                4 is pushed down 2 and 1 to the left
+                3 is pushed down 1
+                2 is pushed up 1 and 1 to the right
+                1 is pushed up 1 and 2 to the right
+
+                Remember that indexes are stored [row column]
+
+            '''
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
 
 
+            if self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1] + 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1]     ]
+                self.blocks['block3'] = [ self.blocks['block3'][0]    , self.blocks['block3'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 2 ]
+
+            elif self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block3'] = [ self.blocks['block3'][0] + 1, self.blocks['block3'][1]     ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 2, self.blocks['block4'][1] - 1 ]
+ 
+        elif self.phase_index == 1: #1 - 'R'
+            '''
+            State R
+            [ ][ ][1][ ]
+            [ ][ ][2][ ]
+            [ ][ ][3][ ]
+            [ ][ ][4][ ]
+
+            R -> 0
+            4 is pushed up 2 and 1 to the right
+            3 is pushed up 1
+            2 is pushed          1 to the left
+            1 is pushed down 1 and 2 to the left
+
+            R -> 2
+            4 is pushed up 1 and 2 to the left
+            3 is pushed up 1 and 1 to the left
+            2 is pushed down 1 
+            1 is pushed down 2 and 1 to the right
+            '''
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 1, self.blocks['block1'][1] - 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0]    , self.blocks['block2'][1] - 1 ]
+                self.blocks['block3'] = [ self.blocks['block3'][0] - 1, self.blocks['block3'][1]     ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 2, self.blocks['block4'][1] + 1 ]
+
+            elif self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1] + 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1]     ]
+                self.blocks['block3'] = [ self.blocks['block3'][0] - 1, self.blocks['block3'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 2 ]
+
+        elif self.phase_index == 2: #2 - '2'
+            '''
+            State 2
+            [ ][ ][ ][ ]
+            [ ][ ][ ][ ]
+            [4][3][2][1]
+            [ ][ ][ ][ ]
+
+            2 -> R
+            4 is pushed down 1 and 2 to the right
+            3 is pushed            1 to the right
+            2 is pushed up 1 
+            1 is pushed up 2 and 1 to the left
+
+            2 -> L
+            4 is pushed down 1 and 2 to the right
+            3 is pushed            1 to the right
+            2 is pushed            1 to the left
+            1 is pushed up 2 and 1 to the left
+            '''
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1] - 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1]     ]
+                self.blocks['block3'] = [ self.blocks['block3'][0]    , self.blocks['block3'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 2 ]
+
+            elif self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1] - 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0]    , self.blocks['block2'][1] - 1 ]
+                self.blocks['block3'] = [ self.blocks['block3'][0]    , self.blocks['block3'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 2 ]
+
+
+        elif self.phase_index == 3: #3 = 'L'
+            '''
+            State L
+            [ ][4][ ][ ]
+            [ ][3][ ][ ]
+            [ ][2][ ][ ]
+            [ ][1][ ][ ]
+
+            L -> 2
+            4 is pushed down 2 and 1 to the left
+            3 is pushed down 1
+            2 is pushed right 1
+            1 is pushed up 1 and 2 to the right
+
+            L -> 0
+            4 is pushed down 1 and 2 to the right
+            3 is pushed            1 to the right
+            2 is pushed up 1
+            1 is pushed up 2 and 1 to the left
+            '''
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1] - 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1]     ]
+                self.blocks['block3'] = [ self.blocks['block3'][0]    , self.blocks['block3'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 2 ]
+
+            elif self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1] - 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0]    , self.blocks['block2'][1] - 1 ]
+                self.blocks['block3'] = [ self.blocks['block3'][0]    , self.blocks['block3'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 2 ]
+
+    def t_rotation(self, value=1):
+        #basically read current phase        
+
+        if self.phase_index == 0: #0 - '0'
+            '''
+                State 0
+                [ ][1][ ]
+                [2][3][4]
+                [ ][ ][ ]
+
+                0 -> L
+                4 moves up 1 and 1 to the left
+                3 stays in center
+                2 moves down 1 and 1 to the right
+                1 moves down 1 and 1 to the left
+
+                0 -> R
+                4 moves down 1 and 1 to the left
+                3 stays in center
+                2 moves up 1 and 1 to the right
+                1 moves down 1 and 1 to the right
+ 
+            '''
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 1, self.blocks['block1'][1] - 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 1, self.blocks['block1'][1] + 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+ 
+        elif self.phase_index == 1: #1 - 'R'
+            '''
+            State R 
+            [ ][2][ ]
+            [ ][3][1]
+            [ ][4][ ]
+            
+            R -> 0
+            4 moves up 1 and 1 to the right
+            3 stays in center 
+            2 moves down 1 and 1 to the left
+            1 moves up 1 and 1 to the left
+
+            R -> 2
+            4 moves up 1 and 1 to the left
+            3 stays in the center
+            2 moves down 1 and 1 to the right
+            1 moves down 1 and 1 to the left
+            '''
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] + 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] - 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+
+        elif self.phase_index == 2: #2 - '2'
+            '''
+            State 2
+            [ ][ ][ ]
+            [4][3][2]
+            [ ][1][ ]
+
+            2 -> R
+            4 moves 1 down and 1 to the right
+            3 stays in center
+            2 moves 1 up and 1 to the left
+            1 moves 1 up and 1 to the right
+
+            2 -> L
+            4 moves 1 up and 1 to the right
+            3 stays in center
+            2 moves down 1 and 1 to the left
+            1 moves up 1 and 1 to the left
+            '''
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] + 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+
+            elif self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] - 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+
+
+        elif self.phase_index == 3: #3 = 'L'
+            '''
+            State L
+            [ ][4][ ]
+            [1][3][ ]
+            [ ][2][ ]
+
+            L -> 2
+            4 moves 1 down and 1 to the left
+            3 stays in the center
+            2 moves 1 up and 1 to the right
+            1 moves 1 down and 1 to the right
+
+            L -> 0
+            4 moves down 1 and 1 to the right
+            3 stays in the center
+            2 moves up 1 and 1 to the left
+            1 moves up 1 and 1 to the right
+            '''
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 1, self.blocks['block1'][1] + 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] + 1 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+    
+    def l_rotation(self, value=1):
+        '''
+        State 0
+        [ ][ ][1]
+        [4][3][2]
+        [ ][ ][ ]
+
+        State R
+        [ ][4][ ]
+        [ ][3][ ]
+        [ ][2][1]
+
+        State 2 
+        [ ][ ][ ]
+        [2][3][4]
+        [1][ ][ ]
+
+        State L
+        [1][2][ ]
+        [ ][3][ ]
+        [ ][4][ ]
+        '''
+
+        if self.phase_index == 0: #0 - '0'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+
+            elif self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+ 
+        elif self.phase_index == 1: #1 - 'R'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+
+        elif self.phase_index == 2: #2 - '2'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+
+
+        elif self.phase_index == 3: #3 = 'L'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+
+            elif self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+
+    def j_rotation(self, value=1):
+        '''
+        State 0 
+        [1][ ][ ]
+        [2][3][4]
+        [ ][ ][ ]
+
+        State R 
+        [ ][2][1]
+        [ ][3][ ]
+        [ ][4][ ]
+
+        State 2 
+        [ ][ ][ ]
+        [4][3][2]
+        [ ][ ][1]
+
+        State L 
+        [ ][4][ ]
+        [ ][3][ ]
+        [1][2][ ]
+        '''
+        
+        if self.phase_index == 0: #0 - '0'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+ 
+        elif self.phase_index == 1: #1 - 'R'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+ 
+            elif self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+
+        elif self.phase_index == 2: #2 - '2'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+
+            elif self.phase_index == 3: 
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+
+
+        elif self.phase_index == 3: #3 = 'L'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+            
+            if self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+    
+    def s_rotation(self, value=1):
+        '''
+        State 0
+        [ ][2][1]
+        [4][3][ ]
+        [ ][ ][ ]
+
+        State R
+        [ ][4][ ]
+        [ ][3][2]
+        [ ][ ][1]
+
+        State 2
+        [ ][ ][ ]
+        [ ][3][4]
+        [1][2][ ]
+
+        State L
+        [1][ ][ ]
+        [2][3][ ]
+        [ ][4][ ]
+        '''
+        if self.phase_index == 0: #0 - '0'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+
+            elif self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+ 
+        elif self.phase_index == 1: #1 - 'R'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+ 
+            elif self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+        
+
+        elif self.phase_index == 2: #2 - '2'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 3: 
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+
+        elif self.phase_index == 3: #3 = 'L'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+
+            elif self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+    
+    def z_rotation(self, value=1):
+        '''
+        State 0
+        [1][2][ ]
+        [ ][3][4]
+        [ ][ ][ ]
+        
+        State R
+        [ ][ ][1]
+        [ ][3][2]
+        [ ][4][ ]
+
+        State 2
+        [ ][ ][ ]
+        [4][3][ ]
+        [ ][2][1]
+
+        State L
+        [ ][4][ ]
+        [2][3][ ]
+        [1][ ][ ]
+        '''
+        if self.phase_index == 0: #0 - '0'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 3:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+ 
+        elif self.phase_index == 1: #1 - 'R'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+ 
+            elif self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
+
+        elif self.phase_index == 2: #2 - '2'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+
+            if self.phase_index == 1:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
+
+            elif self.phase_index == 3: 
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ] #sdvghklgfjkldgfjklj
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] - 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] + 1 ]
+
+
+        elif self.phase_index == 3: #3 = 'L'
+
+            if self.phase_index + value < 0:
+                self.phase_index = 3
+            elif self.phase_index + value > 3:
+                self.phase_index = 0
+            else:
+                self.phase_index += value
+            
+            if self.phase_index == 2:
+                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] - 1 ]
+
+            elif self.phase_index == 0:
+                self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
+                self.blocks['block2'] = [ self.blocks['block2'][0] - 1, self.blocks['block2'][1] + 1 ]
+                self.blocks['block4'] = [ self.blocks['block4'][0] + 1, self.blocks['block4'][1] + 1 ]
 
 
 

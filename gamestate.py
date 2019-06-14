@@ -77,6 +77,7 @@ class GameState:
                     elif i.landed == True and i.frozen == True:
                         self.board[j][k] = ' {} '.format(i.block_type)
 
+
     def move_right(self):
         '''
         Checks whether all blocks can be moved to the right
@@ -244,7 +245,22 @@ if __name__ == '__main__':
                 a.board_update()
                 print(a.printout())
                 print()
-                
+            
+            elif test.lower() == 'l':
+                print( a.block.blocks )
+                a.block.rotate(value=-1)
+                print( a.block.blocks )
+                a.board_update()
+                print(a.printout())
+                print()
+
+            elif test.lower() == 'r':
+                a.block.rotate(value=1)
+                a.board_update()
+                print(a.printout())
+                print()
+
+
             elif test == '':
                 a.gravity()
                 a.board_update()

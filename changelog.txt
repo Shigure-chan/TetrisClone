@@ -1,3 +1,29 @@
+6/14/19
+-added the following methods to GameState.py
+ -i_rotation - hardcoded 
+ -t_rotation
+ -s_rotation
+ -z_rotation
+ -j_rotation
+ -l_rotation
+ -orientation - returns the current orientation of the block
+-revamped the following methods
+ -rotate
+  -what it does now is that it takes either -1, 0, or 1
+   -1 - indicates a 90 degree CCW turn
+    1 - indicates a 90 degree CW turn
+    0 - does nothing
+  -this value is then passed through an if-else block which checks the current block type
+   to determine whether which of the rotation methods above to use...
+
+Things to add:
+-fix the t block and i block rotations (the errors lie in the index shifting)
+-make a better custom spawning method...
+-make the indexes of the blocks... easily accessible for wall kicking purposes
+-revamp testsuite.py to do more substantial tests
+-implement matching/game over
+
+================================================================================================
 6/12/19
 -added new module:
  -testsuite.py
