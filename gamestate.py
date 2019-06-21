@@ -49,12 +49,19 @@ class GameState:
         return   '\n'.join([ ''.join([self.board[i][j] for j in range(len(self.board[i]))]) for i in range(len(self.board)) ])
 
     def spawn(self):
-
-        #initializes Tetrimino object
+        #initializes random Tetrimino object
         self.block = Tetrimino()
         self.existing_blocks.append(self.block)
         self.block.spawn()
 
+    def test_spawn(self, type_str):
+        #initializes custom Tetrimino object
+        self.block = Tetrimino()
+        self.block.set_type(type_str)
+        self.block.spawn()
+        self.existing_blocks.append(self.block)
+    
+        
        
 
     def board_update(self):
@@ -184,6 +191,14 @@ class GameState:
         else:
             return True
 
+    def nothing_rotated_right(self) -> bool:
+        '''
+        basically wall kicking will be implemented...
+        '''
+    
+    def nothing_rotated_left(self) -> bool:
+        pass
+
     def line_clear(self):
         '''
         REQUIRES TESTING!!!!!!
@@ -242,6 +257,17 @@ if __name__ == '__main__':
             
             elif test.lower() == 's':
                 a.spawn()
+                a.board_update()
+                print(a.printout())
+                print()
+            
+            elif test.lower() == 'ss':
+                while True:
+                    b = input('Block Type: ')
+                    if b.upper() in ['I', 'O', 'T', 'S', 'Z', 'J', 'L']:
+                        break
+
+                a.test_spawn(b)
                 a.board_update()
                 print(a.printout())
                 print()

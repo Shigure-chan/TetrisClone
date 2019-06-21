@@ -1,3 +1,22 @@
+6/20/19
+-revamped the following methods in Tetrimino.py
+ -t_rotation()
+  -now works properly; blocks don't scatter apart anymore...
+ -i_rotation()
+  -now works properly; blocks don't scatter apart anymore...
+-added the following methods in GameState.py
+ -test_spawn()
+  -takes a type_str (str) which allows one to spawn a block of a specific type...
+
+Things to do:
+-make the indexes of the blocks... easily accessible for wall kicking purposes
+-revamp testsuite.py to do more substantial and relevant tests
+-implement matching
+-implement gameover
+-implement a queue of three blocks
+
+
+==============================================================================================
 6/14/19
 -added the following methods to GameState.py
  -i_rotation - hardcoded 
