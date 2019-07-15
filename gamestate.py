@@ -32,8 +32,8 @@ class GameState:
         #board_config(15, 10)
 
         #Assertion errors are raised so somebody doesn't try to make a board with negative rows and columns...
-        assert type(columns) == int and rows >= 4, ('GameState.board_config: columns({}) is not a int that is at least 4'.format(columns))
-        assert type(rows) == int and columns >= 4, ('GameState.board_config: rows({}) is not a int that is at least 4'.format(rows))
+        assert type(columns) == int and columns >= 4, ('GameState.board_config: columns({}) is not a int that is at least 4'.format(columns))
+        assert type(rows) == int and rows >= 4, ('GameState.board_config: rows({}) is not a int that is at least 4'.format(rows))
         self.COLUMNS = columns
         self.ROWS = rows
         
@@ -191,13 +191,219 @@ class GameState:
         else:
             return True
 
-    def nothing_rotated_right(self) -> bool:
+    def rotation(self, value=0) -> {str: [int, int]}:
         '''
-        basically wall kicking will be implemented...
+        1. We find the current orientation and coordinates
+        2. We rotate the block
+        2. We get the ideal new orientation and coordinates
+        3. We rotate the block back
+        4. We check the new coordinates depending on which type of block it is...
+        5. 
+        '''
+        current_phase = self.block.orientation() #we need to keep track of the current phase and original coords
+        current_coords = self.block.blocks.copy()
+
+        self.block.rotate(value)
+
+        new_phase = self.block.orientation()  #we need to keep track of the new value
+        rotation_coords = self.block.blocks.copy() 
+
+        self.block.rotate(-value) 
+
+        print('Current Phase\n',current_phase)
+        print('Current coordinates\n', current_coords, '\n')
+
+        print('New Phase\n', new_phase)
+        print('Rotation coordinates\n', rotation_coords, '\n')
+        
+        #each list in the board is each row (first index)
+        #each element in the list is each column (second index)
+
+        '''
+        [X, X, A, X]
+        [X, A, A, X]
+        [X, X, A, X]
         '''
     
-    def nothing_rotated_left(self) -> bool:
-        pass
+        def valid_rotation(rotation_coords: dict) -> bool:
+            '''
+            The valid rotation checks whether the coordinates that a block will rotate into are valid...
+
+            1. First, it filters coordinates to check only the "new" spots; basically to prevent from checking itself...
+            2. We check to see if the coordinates are even inside the bounds of the board
+            3. We then check if the new spot is "unoccupied"
+            '''
+            filtered_rotation_coords = [i for i in rotation_coords.values() if i not in current_coords.values()]
+
+            print(filtered_rotation_coords)
+            
+            for i in filtered_rotation_coords: 
+                row= i[0]
+                column = i[1]
+                
+                if row not in range(ROWS): 
+                    return False
+                if column not in range(COLUMNS):
+                    return False
+                
+                if self.board[row][column] != ' * ':
+                    return False
+            else:
+                return True
+
+
+        def final_coords_generator(rotation_coords: dict, y_value: int, x_value: int) -> {str: [int, int]}:
+            return {i: [rotation_coords[i][0] + y_value, rotation_coords[i][1] + x_value] for i in rotation_coords}
+
+        if valid_rotation(rotation_coords): #Check 1
+            self.block.index_changer(value)
+            self.block.blocks = rotation_coords #the problem here is that the phase isn't changing...
+
+        elif self.block.block_type in ['J', 'L', 'S', 'T', 'Z']:
+
+            if (current_phase, new_phase) in [('R', '0'), ('R', '2')]:
+                if valid_rotation( final_coords_generator(rotation_coords, 0, 1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, 1)
+            
+                elif valid_rotation( final_coords_generator(rotation_coords, -1, 1)  ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -1, 1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 2, 0) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 2, 0)
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 2, 1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 2, 1)
+
+
+            elif (current_phase, new_phase) in [('0', 'R'), ('2', 'R')]:
+                if valid_rotation( final_coords_generator(rotation_coords, 0, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, -1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 1, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 1, -1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, -2, 0) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -2, 0) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, -2, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -2, -1) 
+
+
+            elif (current_phase, new_phase) in [('2', 'L'), ('0', 'L')]:
+                if valid_rotation( final_coords_generator(rotation_coords, 0, 1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, 1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 1, 1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 1, 1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, -2, 0) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -2, 0) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, -2, 1) ):
+                    self.block.blocks = final_coords_generator(rotation_coords, -2, 1) 
+
+
+            elif (current_phase, new_phase) in [('L', '2'), ('L', '0')]:
+                if valid_rotation( final_coords_generator(rotation_coords, 0, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, -1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, -1, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -1, -1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 2, 0) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 2, 0) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 2, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 2, -1) 
+            
+
+        elif self.block.block_type == 'I':
+            if (current_phase, new_phase) in [('R', '0'), ('2', 'L')]:
+                if valid_rotation( final_coords_generator(rotation_coords, 0, 2) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, 2)
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 0, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, -1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 1, 2) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 1, 2) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, -2, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -2, -1) 
+
+
+            elif (current_phase, new_phase) in [('0', 'R'), ('L', '2')]:
+                if valid_rotation( final_coords_generator(rotation_coords, 0, -2) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, -2) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 0, 1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, 1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, -1, -2) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -1, -2) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 2, 1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 2, 1) 
+
+
+            elif (current_phase, new_phase) in [('R', '2'), ('0', 'L')]:
+                if valid_rotation( final_coords_generator(rotation_coords, 0, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, -1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 0, 2) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, 2) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 2, -1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 2, -1) 
+        
+                elif valid_rotation( final_coords_generator(rotation_coords, -1, 2) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -1, 2) 
+
+
+            elif (current_phase, new_phase) in [('2', 'R'), ('L', '0')]:
+                if valid_rotation( final_coords_generator(rotation_coords, 0, 1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, 1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 0, -2) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 0, -2) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, -2, 1) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, -2, 1) 
+                
+                elif valid_rotation( final_coords_generator(rotation_coords, 1, -2) ):
+                    self.block.index_changer(value)
+                    self.block.blocks = final_coords_generator(rotation_coords, 1, -2) 
+
 
     def line_clear(self):
         '''
@@ -273,19 +479,18 @@ if __name__ == '__main__':
                 print()
             
             elif test.lower() == 'l':
-                print( a.block.blocks )
-                a.block.rotate(value=-1)
-                print( a.block.blocks )
-                a.board_update()
+                print(a.block.blocks) #before rotation
+                a.rotation(value=-1) #revamped rotation method--this is the one that will implement wall kicking
+                a.board_update() 
                 print(a.printout())
                 print()
 
             elif test.lower() == 'r':
-                a.block.rotate(value=1)
-                a.board_update()
+                print(a.block.blocks) #before rotation
+                a.rotation(value=1) #revamped rotation method--this is the one that will implement wall kicking
+                a.board_update() 
                 print(a.printout())
                 print()
-
 
             elif test == '':
                 a.gravity()

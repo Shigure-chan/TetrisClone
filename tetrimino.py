@@ -1,7 +1,7 @@
 #Kevin Huang
 
 #eventually return the indexes so we can check whether the rotation is valid and implement wall kicks...
-#need to fix the t/i block
+
 
 
 from random import choice
@@ -62,25 +62,32 @@ class Tetrimino():
         assert value in [-1, 0, 1], f'Tetrimino.rotate: value({value}) should be either -1, 0, or 1'
         
         if self.block_type == 'I':
-            self.i_rotation(value) 
+            self.i_rotation(value)
+            return self.blocks
             
         elif self.block_type == 'O':
-            pass #o literally does not rotate
+            #o literally does not rotate
+            return self.blocks
             
         elif self.block_type == 'T':
             self.t_rotation(value)
+            return self.blocks
 
         elif self.block_type == 'S':
             self.s_rotation(value)
+            return self.blocks
             
         elif self.block_type == 'Z':
             self.z_rotation(value)
+            return self.blocks
             
         elif self.block_type == 'J':
             self.j_rotation(value)
+            return self.blocks
 
         elif self.block_type == 'L':
             self.l_rotation(value)
+            return self.blocks
 
             
     
@@ -89,6 +96,19 @@ class Tetrimino():
         returns the current orientation of the block
         '''
         return self.rotation_phases[self.phase_index]
+
+    def index_changer(self, value):
+        '''
+        Used when rotation occurs to change the phase_index
+        '''
+        if self.phase_index + value < 0:
+            self.phase_index = 3
+
+        elif self.phase_index + value > 3:
+            self.phase_index = 0
+
+        else:
+            self.phase_index += value
     
 
     def position_blocks(self, row, col):
@@ -400,13 +420,7 @@ class Tetrimino():
                 Remember that indexes are stored [row column]
 
             '''
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
-
+            self.index_changer(value)
 
             if self.phase_index == 3:
                 self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1] + 1 ]
@@ -440,12 +454,7 @@ class Tetrimino():
             2 is pushed down 1 
             1 is pushed down 2 and 1 to the right
             '''
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 0:
                 self.blocks['block1'] = [ self.blocks['block1'][0] + 1, self.blocks['block1'][1] - 2 ]
@@ -479,12 +488,7 @@ class Tetrimino():
             2 is pushed          1 to the left
             1 is pushed down 1 and 2 to the left
             '''
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 1:
                 self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1] - 1 ]
@@ -519,12 +523,7 @@ class Tetrimino():
             2 is pushed up 1
             1 is pushed up 2 and 1 to the left
             '''
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 2:
                 self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] + 2 ]
@@ -561,12 +560,7 @@ class Tetrimino():
                 1 moves down 1 and 1 to the right
  
             '''
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 3:
                 self.blocks['block1'] = [ self.blocks['block1'][0] + 1, self.blocks['block1'][1] - 1 ]
@@ -597,12 +591,7 @@ class Tetrimino():
             2 moves down 1 and 1 to the right
             1 moves down 1 and 1 to the left
             '''
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 0:
                 self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] - 1 ]
@@ -633,12 +622,7 @@ class Tetrimino():
             2 moves down 1 and 1 to the left
             1 moves up 1 and 1 to the left
             '''
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 1:
                 self.blocks['block1'] = [ self.blocks['block1'][0] - 1, self.blocks['block1'][1] + 1 ]
@@ -670,12 +654,7 @@ class Tetrimino():
             2 moves up 1 and 1 to the left
             1 moves up 1 and 1 to the right
             '''
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 2:
                 self.blocks['block1'] = [ self.blocks['block1'][0] + 1, self.blocks['block1'][1] + 1 ]
@@ -712,12 +691,7 @@ class Tetrimino():
 
         if self.phase_index == 0: #0 - '0'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 3:
                 self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
@@ -731,12 +705,7 @@ class Tetrimino():
  
         elif self.phase_index == 1: #1 - 'R'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 0:
                 self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
@@ -750,12 +719,7 @@ class Tetrimino():
 
         elif self.phase_index == 2: #2 - '2'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 1:
                 self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
@@ -770,12 +734,7 @@ class Tetrimino():
 
         elif self.phase_index == 3: #3 = 'L'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 2:
                 self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
@@ -812,15 +771,10 @@ class Tetrimino():
         
         if self.phase_index == 0: #0 - '0'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 3:
-                self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
+                self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
                 self.blocks['block2'] = [ self.blocks['block2'][0] + 1, self.blocks['block2'][1] + 1 ]
                 self.blocks['block4'] = [ self.blocks['block4'][0] - 1, self.blocks['block4'][1] - 1 ]
 
@@ -831,12 +785,7 @@ class Tetrimino():
  
         elif self.phase_index == 1: #1 - 'R'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 0:
                 self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
@@ -850,12 +799,7 @@ class Tetrimino():
 
         elif self.phase_index == 2: #2 - '2'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 1:
                 self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
@@ -870,12 +814,7 @@ class Tetrimino():
 
         elif self.phase_index == 3: #3 = 'L'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
             
             if self.phase_index == 2:
                 self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
@@ -911,12 +850,7 @@ class Tetrimino():
         '''
         if self.phase_index == 0: #0 - '0'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 3:
                 self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
@@ -930,12 +864,7 @@ class Tetrimino():
  
         elif self.phase_index == 1: #1 - 'R'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 0:
                 self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
@@ -950,12 +879,7 @@ class Tetrimino():
 
         elif self.phase_index == 2: #2 - '2'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 1:
                 self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]
@@ -969,12 +893,7 @@ class Tetrimino():
 
         elif self.phase_index == 3: #3 = 'L'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 2:
                 self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
@@ -1010,12 +929,7 @@ class Tetrimino():
         '''
         if self.phase_index == 0: #0 - '0'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 3:
                 self.blocks['block1'] = [ self.blocks['block1'][0] + 2, self.blocks['block1'][1]     ]
@@ -1029,12 +943,7 @@ class Tetrimino():
  
         elif self.phase_index == 1: #1 - 'R'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 0:
                 self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] - 2 ]
@@ -1048,12 +957,7 @@ class Tetrimino():
 
         elif self.phase_index == 2: #2 - '2'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
 
             if self.phase_index == 1:
                 self.blocks['block1'] = [ self.blocks['block1'][0] - 2, self.blocks['block1'][1]     ]
@@ -1068,12 +972,7 @@ class Tetrimino():
 
         elif self.phase_index == 3: #3 = 'L'
 
-            if self.phase_index + value < 0:
-                self.phase_index = 3
-            elif self.phase_index + value > 3:
-                self.phase_index = 0
-            else:
-                self.phase_index += value
+            self.index_changer(value)
             
             if self.phase_index == 2:
                 self.blocks['block1'] = [ self.blocks['block1'][0]    , self.blocks['block1'][1] + 2 ]

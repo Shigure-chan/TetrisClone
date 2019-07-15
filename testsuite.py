@@ -8,7 +8,6 @@ import random
 
 import gamestate
 import tetrimino
-import helper
 
 class TetrisTest(unittest.TestCase):
     def setUp(self):

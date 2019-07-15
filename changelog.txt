@@ -1,5 +1,103 @@
+7/14/19
+-revamped the following modules
+ -gamestate.py
+  -revamped the following methods:
+   -rotation(self, value=0)
+    -There was abnormal behavior. After one rotation, the block would split apart, despite the
+     Tetrimino rotation methods working fine. What happened was that the if-elif-else logic
+     wasn't quite correct as well as the phase-indexes not changing. That was weird.
+
+     Basically, I should be careful using if-if-if vs. if-elif-elif.
+     Also the phase-indexes were not changing which caused the code to apply the wrong rotation
+     methods. I remedied this. Wall-kicking so far seems to be working properly.
+   
+  -valid_rotation(rotation_coords)
+   -this might actually be a ton more efficient now since I use one for loop to check if the
+    new rotation coordinates are valid. I itereate through a list comprehension which eliminates
+    coordinates if they basically end up checking the block's original location
+
+ -tetrimino.py
+  -added the following methods:
+   -index_changer(self, value)
+    this basically took a block of code which was repeated throughout the several rotation 
+    methods that I had made for each block. By putting this repeated block in a method and
+    just simply using that method over and over, it reduced this module by about, I would hazard
+    50 or so lines? Not shabby.
+
+Goals:
+-implement matching
+ -I'm assuming all I have to do is check if a row or a list is full
+ -Then, I show the matching.
+ -Then, I empty the row.
+ -Then I push the rows down. Hopefully, I don't do this recursively.
+ -I'll do more research on this, but this seems rather straightforward to be honest.
+ 
+-implement gameover
+-implement queue
+-implement scoring system
+
+All changes made by Kevin Huang
+
+===============================================================================================
+7/10/19
+fixed J-rotation...
+J rotation algorithms turned out to be slightly off. Apparently, when a newly spawned J-block
+was rotated left, it rotated into the 'R' orientation instead of the 'L' orientation, causing
+it to exhibit abnormal behavior. By editing the code, we were able to catch this issue 
+
+All changes made by Kevin Huang
+
+==================================================================================================
+7/9/19
+-revamped the following methods in gamestate.py
+ -rotation()
+  -current_coords variable now uses the .copy() method on the blocks attribute of the current
+   Tetrimino object stored in the current_block attribute of GameState
+  
+fixed rotation
+I created a current_coords variable and a rotation_coords variable which respectively store
+a dictionary of the coordinates before rotation and a dictionary of the coordinates after.
+The rest of the rotation function didn't work because the two variables were assigned to 
+the blocks attribute of the Tetrimino object. Since I didn't use .copy() for current_coords,
+using current_coords at the end would cause it to reference the dict modified after rotation
+instead of before like I intended.
+
+All changes made by Kevin Huang
+
+===============================================================================================
+7/5/19
+-revamped the following methods in gamestate.py
+ -rotation now has two internal helper functions:
+  -valid_rotation
+   -makes sure that the indexes are within the bounds of the board
+  -final_coords_generator
+   -a dict comprehension that produces the new rotation
+
+ -rotation function should ideally do the following:
+  -the block current phase, type, and position is stored in variables
+  -the block's new phase, type, and position are also stored
+  -the block undergoes numerous checks
+   -we check that the initial new coordinates are valid and unoccupied
+   -if not, use the final_coords_generator to create a new set
+   -ad nauseum until all tests have failed; if we reach this step, rotation fails completely
+
+Things in progress:
+For some reason, this rotation function is not getting the new coordinates
+Since this is failing, we can't proceed using the new coordinates
+The problem might lie in the rotation method in the Tetrimino class, but I'm not sure...
+  
+Things to do:
+-fix rotation
+-revamp testsuite.py
+-implement matching
+-implement gameover
+-implement the queue
+
+All changes made by Kevin Huang
+
+==================================================================================================
 6/20/19
--revamped the following methods in Tetrimino.py
+-revamped the following methods in tetrimino.py
  -t_rotation()
   -now works properly; blocks don't scatter apart anymore...
  -i_rotation()
@@ -15,6 +113,7 @@ Things to do:
 -implement gameover
 -implement a queue of three blocks
 
+All changes made by Kevin Huang
 
 ==============================================================================================
 6/14/19
@@ -41,6 +140,8 @@ Things to add:
 -make the indexes of the blocks... easily accessible for wall kicking purposes
 -revamp testsuite.py to do more substantial tests
 -implement matching/game over
+
+All changes made by Kevin Huang
 
 ================================================================================================
 6/12/19
@@ -87,7 +188,7 @@ Things to add:
 -Revamp unit tests for those different rotation possibilities
 -Create appropriate helper methods or functions as needed to implement a rotation algorithm
 
-
+All changes made by Kevin Huang
 
 =======================================================================================
 5/26/19
