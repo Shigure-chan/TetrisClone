@@ -1,3 +1,277 @@
+7/18/19
+-added to the following modules:
+ -gamestate.py
+  -added the following methods
+   -hard_drop(self)
+    -this makes the blocks immediately fall down as far as it can without occupying another block
+    
+Goals:
+-implement matching
+ -I'm assuming all I have to do is check if a row or a list is full
+ -Then, I show the matching.
+ -Then, I empty the row.
+ -Then I push the rows down. Hopefully, I don't do this recursively.
+ -I'll do more research on this, but this seems rather straightforward to be honest.
+
+-implement gameover
+-implement the queue
+-implement the scoring system
+
+All changes made by Kevin Huang
+==========================================================================================================================================
+7/14/19
+-revamped the following modules
+ -gamestate.py
+  -revamped the following methods:
+   -rotation(self, value=0)
+    -There was abnormal behavior. After one rotation, the block would split apart, despite the
+     Tetrimino rotation methods working fine. What happened was that the if-elif-else logic
+     wasn't quite correct as well as the phase-indexes not changing. That was weird.
+
+     Basically, I should be careful using if-if-if vs. if-elif-elif.
+     Also the phase-indexes were not changing which caused the code to apply the wrong rotation
+     methods. I remedied this. Wall-kicking so far seems to be working properly.
+   
+  -valid_rotation(rotation_coords)
+   -this might actually be a ton more efficient now since I use one for loop to check if the
+    new rotation coordinates are valid. I itereate through a list comprehension which eliminates
+    coordinates if they basically end up checking the block's original location
+
+ -tetrimino.py
+  -added the following methods:
+   -index_changer(self, value)
+    this basically took a block of code which was repeated throughout the several rotation 
+    methods that I had made for each block. By putting this repeated block in a method and
+    just simply using that method over and over, it reduced this module by about, I would hazard
+    50 or so lines? Not shabby.
+
+Goals:
+-implement matching
+ -I'm assuming all I have to do is check if a row or a list is full
+ -Then, I show the matching.
+ -Then, I empty the row.
+ -Then I push the rows down. Hopefully, I don't do this recursively.
+ -I'll do more research on this, but this seems rather straightforward to be honest.
+ 
+-implement gameover
+-implement queue
+-implement scoring system
+
+All changes made by Kevin Huang
+
+===============================================================================================
+7/10/19
+fixed J-rotation...
+J rotation algorithms turned out to be slightly off. Apparently, when a newly spawned J-block
+was rotated left, it rotated into the 'R' orientation instead of the 'L' orientation, causing
+it to exhibit abnormal behavior. By editing the code, we were able to catch this issue 
+
+All changes made by Kevin Huang
+
+==================================================================================================
+7/9/19
+-revamped the following methods in gamestate.py
+ -rotation()
+  -current_coords variable now uses the .copy() method on the blocks attribute of the current
+   Tetrimino object stored in the current_block attribute of GameState
+  
+fixed rotation
+I created a current_coords variable and a rotation_coords variable which respectively store
+a dictionary of the coordinates before rotation and a dictionary of the coordinates after.
+The rest of the rotation function didn't work because the two variables were assigned to 
+the blocks attribute of the Tetrimino object. Since I didn't use .copy() for current_coords,
+using current_coords at the end would cause it to reference the dict modified after rotation
+instead of before like I intended.
+
+All changes made by Kevin Huang
+
+===============================================================================================
+7/5/19
+-revamped the following methods in gamestate.py
+ -rotation now has two internal helper functions:
+  -valid_rotation
+   -makes sure that the indexes are within the bounds of the board
+  -final_coords_generator
+   -a dict comprehension that produces the new rotation
+
+ -rotation function should ideally do the following:
+  -the block current phase, type, and position is stored in variables
+  -the block's new phase, type, and position are also stored
+  -the block undergoes numerous checks
+   -we check that the initial new coordinates are valid and unoccupied
+   -if not, use the final_coords_generator to create a new set
+   -ad nauseum until all tests have failed; if we reach this step, rotation fails completely
+
+Things in progress:
+For some reason, this rotation function is not getting the new coordinates
+Since this is failing, we can't proceed using the new coordinates
+The problem might lie in the rotation method in the Tetrimino class, but I'm not sure...
+  
+Things to do:
+-fix rotation
+-revamp testsuite.py
+-implement matching
+-implement gameover
+-implement the queue
+
+All changes made by Kevin Huang
+
+==================================================================================================
+6/20/19
+-revamped the following methods in tetrimino.py
+ -t_rotation()
+  -now works properly; blocks don't scatter apart anymore...
+ -i_rotation()
+  -now works properly; blocks don't scatter apart anymore...
+-added the following methods in GameState.py
+ -test_spawn()
+  -takes a type_str (str) which allows one to spawn a block of a specific type...
+
+Things to do:
+-make the indexes of the blocks... easily accessible for wall kicking purposes
+-revamp testsuite.py to do more substantial and relevant tests
+-implement matching
+-implement gameover
+-implement a queue of three blocks
+
+All changes made by Kevin Huang
+
+==============================================================================================
+6/14/19
+-added the following methods to GameState.py
+ -i_rotation - hardcoded 
+ -t_rotation
+ -s_rotation
+ -z_rotation
+ -j_rotation
+ -l_rotation
+ -orientation - returns the current orientation of the block
+-revamped the following methods
+ -rotate
+  -what it does now is that it takes either -1, 0, or 1
+   -1 - indicates a 90 degree CCW turn
+    1 - indicates a 90 degree CW turn
+    0 - does nothing
+  -this value is then passed through an if-else block which checks the current block type
+   to determine whether which of the rotation methods above to use...
+
+Things to add:
+-fix the t block and i block rotations (the errors lie in the index shifting)
+-make a better custom spawning method...
+-make the indexes of the blocks... easily accessible for wall kicking purposes
+-revamp testsuite.py to do more substantial tests
+-implement matching/game over
+
+All changes made by Kevin Huang
+
+================================================================================================
+6/12/19
+-added new module:
+ -testsuite.py
+-wrote documentation for i block in GameState.py
+-look into rotation matrices to avoid hardcoding every rotation in the game...
+ -also consider reviewing Linear Algebra... Because that was embarassing...
+
+-gamestate.py
+ -revamped following methods to use methods in tetrimino...
+  -move_right
+  -move_left
+  -gravity
+  -nothing_below
+  -nothing_right
+  -nothing_left
+   -all these new methods are using the new methods added to the Tetrimino class...
+
+ -added following methods to Tetrimino() (tetrimino.py) for unittest/modularity
+  -set_type
+   -allows one to change the type of the block
+  -rotate
+   -allows one to go between the different rotational phases
+  -position_blocks
+   -allows one to position blocks using block1 as a reference
+  -fall_down
+   -adds 1 to the row index of each sub-block
+  -move_left
+   -subtracts 1 from the col index of each sub-block
+  -move_right
+   -adds 1 to the col index of each sub_block
+  -indexes_below
+   -generates a list of indexes directly below each sub-block (that doesn't refer to a sub-block)
+  -indexes_right
+   -ditto
+  -indexes_left
+   -ditto
+
+
+Things to add:
+-Finish writing notes for every rotation combination...
+-Read up on rotational matrices...
+-Revamp unit tests for those different rotation possibilities
+-Create appropriate helper methods or functions as needed to implement a rotation algorithm
+
+All changes made by Kevin Huang
+
+=======================================================================================
+5/26/19
+-gamestate.py
+ -added following methods in GameState class:
+  -nothing_below
+   -returns bool that detects whether spaces below are empty
+    now modified such that it detects spaces below the bottom blocks 
+    instead of all blocks in the current tetrimino
+  -nothing_right
+   -similar principle as nothing_below
+  -nothing_left
+   -ditto
+  -rotation
+   -still need to conceptualize it...
+
+Things to add:
+ -implement a simple rotation alogrithm
+  -write down notes on Tetris's actual implementation
+ -a module to unit test Tetris
+
+All changes made by Kevin Huang
+  
+==================================================================================
+5/15/19
+-gamestate.py
+ -started progress on the nothing_below method
+ -nothing_below will return a bool that detects whether the spaces
+  below the current tetrimino is empty. if empty, the tetrimino can
+  fall into those squares; otherwise, it lands, then freezes...
+ -nothing_right and nothing_left will work similarily...
+ 
+Things to add:
+ -implementing rotation
+ -changing gravity so that the current tetrimino dosn't override existing
+  blocks
+ -perhaps change possible to a method that returns a bool and rewrite it
+  so that it's more readable and concise...
+
+All changes made by Kevin Huang
+ 
+======================================================================================
+5/13/19
+-gamestate.py
+ -added following attributes to GameState Class:
+  -existing_blocks
+   -is a list of all block objects that have existed...
+   -implemented so previous blocks wouldn't be overwritten...
+ -modified gravity method to incorporate freezing and landing mechanics
+-tetrimino.py
+ -added following attributes to the Tetrimino:
+  -frozen - activates a tick after landing (only works with bottom for now)
+  -landed - activates upon landing (only works with the bottom for now)
+
+Things to add:
+ -implementing rotation
+ -modifying the movement such that the current tetrimino doesn't occupy 
+  an space already occupied by an existing block...
+
+All changes made by Kevin Huang
+
+=======================================================================================
 5/10/19
 -gamestate.py
  -added the following methods in GameState class:
