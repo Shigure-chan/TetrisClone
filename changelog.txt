@@ -1,3 +1,24 @@
+7/18/19
+-added to the following modules:
+ -gamestate.py
+  -added the following methods
+   -hard_drop(self)
+    -this makes the blocks immediately fall down as far as it can without occupying another block
+    
+Goals:
+-implement matching
+ -I'm assuming all I have to do is check if a row or a list is full
+ -Then, I show the matching.
+ -Then, I empty the row.
+ -Then I push the rows down. Hopefully, I don't do this recursively.
+ -I'll do more research on this, but this seems rather straightforward to be honest.
+
+-implement gameover
+-implement the queue
+-implement the scoring system
+
+All changes made by Kevin Huang
+==========================================================================================================================================
 7/14/19
 -revamped the following modules
  -gamestate.py

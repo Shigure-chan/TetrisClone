@@ -145,6 +145,29 @@ class GameState:
                 
                 if self.nothing_below():
                     self.block.fall_down()
+    
+    def hard_drop(self):
+        '''
+        In Tetris, we need to make blocks immediately fall down...
+
+        To hard drop... we get the current bottom... At most, all four blocks. 
+        Then, we use a for loop to test each row and column value below the 'bottom' to see how many we must move down
+        Then we check to see if we can use the spaces for the 'top'
+        If this doesn't work, we take the next value...
+        '''
+        block_coords = self.block.blocks.copy()
+        bottom_value = max([i[0] for i in block_coords.values()])
+
+        for i in range(1, 22 - bottom_value):
+            
+            hard_drop = {block: [block_coords[block][0] + i, block_coords[block][1]] for block in block_coords}
+            current_pos = {i: [hard_drop[i][0] - 1, hard_drop[i][1] ] for i in hard_drop}
+
+            if any([self.board[x][y] != ' * ' for x,y in hard_drop.values() if [x,y] not in current_pos.values()]):
+                self.block.blocks = current_pos
+                break
+        else:
+            self.block.blocks = hard_drop
 
     def nothing_below(self) -> bool:
         '''
@@ -494,6 +517,12 @@ if __name__ == '__main__':
 
             elif test == '':
                 a.gravity()
+                a.board_update()
+                print(a.printout())
+                print()
+
+            elif test == '^':
+                a.hard_drop()
                 a.board_update()
                 print(a.printout())
                 print()
