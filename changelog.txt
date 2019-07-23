@@ -1,9 +1,43 @@
+7/23/19
+-added to the following modules:
+ -gamestate.py
+  -added the following methods:
+   -existing_blocks_list(self)
+    -returns a list of the Tetrimino objects in str form in self.existing blocks
+
+   -block_coords_deleter(self, specific_block: [int, int])
+    -deletes specific coordinates from a block object
+    -implemented so the update function doesn't display tetrimino blocks that have been cleared away
+
+   -block_deleter(self)
+    -deletes Tetrimino objects if they have no more blocks on the board
+
+   -mark_lines(self)
+    -replaces "full" lines with a line of clear strings to mark rows for deletion
+
+   -line_clear(self)
+    -"clears" lines, then pushes the rows above those lines down
+
+Accomplishments:
+-matching has finally been implemented
+
+Goals:
+-implement spawning
+-implement ghost block
+-implement queue
+-implement switching current block with blocks in the queue
+-implement scoring system
+
+All changes implemented by Kevin Huang   
+ 
+========================================================================================================================================
 7/18/19
 -added to the following modules:
  -gamestate.py
   -added the following methods
    -hard_drop(self)
     -this makes the blocks immediately fall down as far as it can without occupying another block
+    -fixed it such that the block freezes immediately once dropped
     
 Goals:
 -implement matching

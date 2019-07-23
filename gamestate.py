@@ -8,6 +8,7 @@ from tetrimino import Tetrimino
 
 ROWS = 22 #20 for the actual well, first 2 for the buffer zone
 COLUMNS = 10 #default width
+CLEAR_STRING = ' # '
 
 
 class GameState:
@@ -26,7 +27,24 @@ class GameState:
         assert type(self.block) == Tetrimino, 'GameState.block_pieces: self.block is not a Tetrimino object'
         return self.block.blocks
 
+    def existing_blocks_list(self) -> [str]:
+        return [str(i) for i in self.existing_blocks]
 
+    def block_coords_deleter(self, specific_block: [int, int]):
+        for tetrimino in self.existing_blocks:
+            blocks_to_delete = []
+            for block in tetrimino.blocks:
+                if tetrimino.blocks[block] == specific_block:
+                    blocks_to_delete.append(block)
+            for i in blocks_to_delete:
+                del tetrimino.blocks[i]
+    
+    def block_deleter(self):
+        '''
+        makes sure that if a block doesn't exist (no more coordinates), it just deletes the block object completely from the game
+        '''
+        self.existing_blocks = [block for block in self.existing_blocks if len(block.blocks) != 0]
+        
 
     def board_config(self, columns, rows):
         #board_config(15, 10)
@@ -164,9 +182,13 @@ class GameState:
             current_pos = {i: [hard_drop[i][0] - 1, hard_drop[i][1] ] for i in hard_drop}
 
             if any([self.board[x][y] != ' * ' for x,y in hard_drop.values() if [x,y] not in current_pos.values()]):
+                self.block.landed = True
+                self.block.frozen = True
                 self.block.blocks = current_pos
                 break
         else:
+            self.block.landed = True
+            self.block.frozen = True
             self.block.blocks = hard_drop
 
     def nothing_below(self) -> bool:
@@ -428,20 +450,66 @@ class GameState:
                     self.block.blocks = final_coords_generator(rotation_coords, 1, -2) 
 
 
-    def line_clear(self):
+    def mark_lines(self):
         '''
         REQUIRES TESTING!!!!!!
         replaces any rows full of only letters (nested lists) stored in self.board with rows of clear_strings
-        '''
-        
-        clear_string = '#*#'
 
+        -I'm assuming all I have to do is check if a row or a list is full
+        -Then, I show the matching.
+        -Then, I empty the row.
+        -Then I push the rows down. Hopefully, I don't do this recursively.
+        -I'll do more research on this, but this seems rather straightforward to be honest.
+        '''
+        indexes = []
         
         for i in range(len(self.board)):
             if ' * ' not in self.board[i]:
-                self.board[i] = [clear_string] * COLUMNS
-
+                self.board[i] = [CLEAR_STRING for i in range(COLUMNS)]
+                indexes.append(i)
+            
     
+
+        
+      
+
+    def line_clear(self):
+        #print('line_clear')
+        
+        coords = []
+
+        #collects the coordinates
+        for row in range(len(self.board)):
+            if self.board[row] == [CLEAR_STRING for i in range(COLUMNS)]:
+                for column in range(COLUMNS):
+                    coords.append([row, column])
+        
+        #deletes the coordinates from the blocks because the update function relies primarily on existing block coordinates
+        for coord in coords:
+            self.block_coords_deleter(coord)
+        
+        #deletes any block objects with no coordinates...
+        self.block_deleter()
+
+        
+        #the blocks above cleared lines end up getting hard dropped...
+            #collect the indexes of the rows cleared
+            #compare the row index of any block above that row
+            #if four lines are cleared under a block, we add four to the row index of that block
+        
+        #print(self.existing_blocks_list())
+        #print()
+
+        for block in self.existing_blocks:
+            for coord in block.blocks:
+                block.blocks[coord][0] += len({i[0] for i in coords if i[0] > block.blocks[coord][0]}) #rows 19 and 20 are cleared; thus 18 goes down two rows, 
+        
+        
+        
+        #print(self.existing_blocks_list())
+        
+        
+
     
         
                     
@@ -463,6 +531,9 @@ if __name__ == '__main__':
     while True:
         counter += 1
         print('State {}'.format(counter))
+        
+        
+
         try:
             test = input()
             assert type(test) == str, 'input must be a str type object'
@@ -496,7 +567,7 @@ if __name__ == '__main__':
                     if b.upper() in ['I', 'O', 'T', 'S', 'Z', 'J', 'L']:
                         break
 
-                a.test_spawn(b)
+                a.test_spawn(b.upper())
                 a.board_update()
                 print(a.printout())
                 print()
@@ -516,9 +587,12 @@ if __name__ == '__main__':
                 print()
 
             elif test == '':
-                a.gravity()
-                a.board_update()
+                
+                a.gravity() #blocks fall, land, freeze
+                a.board_update() #board does any updates
+                a.mark_lines()
                 print(a.printout())
+                a.line_clear()
                 print()
 
             elif test == '^':

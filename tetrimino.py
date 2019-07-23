@@ -44,13 +44,16 @@ class Tetrimino():
 
         self.landed = False
         self.frozen = False
+    
+    def __str__(self):
+        return f'Tetrimino({self.blocks})'
 
     def set_type(self, type_str):
         '''
         for testing purposes...
         allows one to change the type of a block, handy for unittesting
         '''
-        assert type_str in ['I', 'O', 'T', 'S', 'Z', 'J', 'L'], f'Tetrimino.set_type: type_str(\'{type_str}\') must be either \'I\', \'O\', \'T\', \'S\', \'Z\', \'J\', \'L\''
+        #assert type_str in ['I', 'O', 'T', 'S', 'Z', 'J', 'L'], f'Tetrimino.set_type: type_str(\'{type_str}\') must be either \'I\', \'O\', \'T\', \'S\', \'Z\', \'J\', \'L\''
         self.block_type = type_str
     
     def rotate(self, value):

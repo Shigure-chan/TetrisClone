@@ -9,4 +9,3 @@ def copyright():
     print('Tetris Logo Design by Roger Dean.')
     print('All Rights Reserved.')
 
-
