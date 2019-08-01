@@ -1,3 +1,47 @@
+To-do
+
+Tetris console version:
+-ghost block
+-make it so that next queue can be shown in the graphical version...
+-hold queue
+-game over
+-scoring
+-high score
+=================================================================================================
+8/1/19
+-added to the following modules:
+ -tetrimino.py
+  -revamped:
+    o_block()
+    -the top two blocks of an o mino now generate only in columns 5,6 or indexes 4,5
+    i_block()
+    -the most left block generates in row 21 or index 1 on columns 4,5,6,7, or indexes 3,4,5,6
+    s,z,l,j,t_block()
+    -the most left block(s) generate on column 4 or index 3
+
+ -gamestate.py
+ -revamped the following methods
+  -spawn(self)
+   -if the queue is more than length 0, the method will spawn a Tetrimino
+   -the Tetrimino object will have the first type in the queue
+   -the first element in the queue is deleted
+   
+   -if the queue is length 0
+   -the block_types is reshuffled and the queue is set to a copy of the shuffle
+   -the Tetrimno will have the first type in the queue
+   -the first element in the queue is deleted
+
+  -init(self)
+   -GameState has two new attributes: block_types and queue
+   -When an GameState object is initialized, this now happens
+    -GameState will shuffle block_types in place and initialize queue to a copy of block_types
+
+  
+
+Accomplishments:
+Random "bag" system
+
+=======================================================================================================================================================================
 7/23/19
 -added to the following modules:
  -gamestate.py

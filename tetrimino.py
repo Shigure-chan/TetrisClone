@@ -182,8 +182,7 @@ class Tetrimino():
         '''
         
         #block1 generates in the 0th row (1st row, in buffer zone)
-        #block1 enerates in columns 0 to 8; otherwise, it could spawn in column 9...
-        self.blocks['block1'] = [ 0, choice(range(0,9)) ]
+        self.blocks['block1'] = [ 0, 4]
         
         self.blocks['block2'] = [ 0, self.blocks['block1'][1] + 1 ]
         self.blocks['block3'] = [ 1, self.blocks['block1'][1]     ]
@@ -206,11 +205,11 @@ class Tetrimino():
 
        '''
 
-        self.blocks['block1'] = [ 0, choice(range(0,7)) ] #prevents it from spawning offscreen
+        self.blocks['block1'] = [1, 3] #prevents it from spawning offscreen
         
-        self.blocks['block2'] = [ 0, self.blocks['block1'][1] + 1 ]
-        self.blocks['block3'] = [ 0, self.blocks['block1'][1] + 2 ]
-        self.blocks['block4'] = [ 0, self.blocks['block1'][1] + 3 ]
+        self.blocks['block2'] = [ 1, self.blocks['block1'][1] + 1 ]
+        self.blocks['block3'] = [ 1, self.blocks['block1'][1] + 2 ]
+        self.blocks['block4'] = [ 1, self.blocks['block1'][1] + 3 ]
 
         return None #prevents recursion...
 
@@ -227,7 +226,7 @@ class Tetrimino():
         [2][3][4]
         [ ][ ][ ]
         '''
-        self.blocks['block1'] = [ 0, choice(range(1,9)) ] #prevents it from spawning offscreen
+        self.blocks['block1'] = [ 0, 4 ] #prevents it from spawning offscreen
 
         self.blocks['block2'] = [ 1, self.blocks['block1'][1] - 1 ]
         self.blocks['block3'] = [ 1, self.blocks['block1'][1]     ] #center
@@ -261,7 +260,7 @@ class Tetrimino():
         [ ][4][ ]
         
         '''
-        self.blocks['block1'] = [ 0, choice(range(2, 10))]
+        self.blocks['block1'] = [ 0, 5]
 
         self.blocks['block2'] = [ 1, self.blocks['block1'][1]      ]
         self.blocks['block3'] = [ 1, self.blocks['block1'][1] - 1  ] #center
@@ -295,7 +294,7 @@ class Tetrimino():
         [1][2][ ]
         
         '''
-        self.blocks['block1'] = [ 0, choice(range(0, 8))]
+        self.blocks['block1'] = [ 0, 3]
 
         self.blocks['block2'] = [ 1, self.blocks['block1'][1]     ]
         self.blocks['block3'] = [ 1, self.blocks['block1'][1] + 1 ] #center
@@ -329,7 +328,7 @@ class Tetrimino():
         [ ][4][ ]
         
         '''
-        self.blocks['block1'] = [ 0, choice(range(2, 10))]
+        self.blocks['block1'] = [ 0, 5]
 
         self.blocks['block2'] = [ 0, self.blocks['block1'][1] - 1  ]
         self.blocks['block3'] = [ 1, self.blocks['block1'][1] - 1  ] #center
@@ -362,7 +361,7 @@ class Tetrimino():
         [2][3][ ]
         [1][ ][ ]
         '''
-        self.blocks['block1'] = [ 0, choice(range(0, 8))]
+        self.blocks['block1'] = [ 0, 3 ]
 
         self.blocks['block2'] = [ 0, self.blocks['block1'][1] + 1 ]
         self.blocks['block3'] = [ 1, self.blocks['block1'][1] + 1 ] #center

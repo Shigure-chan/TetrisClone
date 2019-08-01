@@ -5,6 +5,7 @@
 
 
 from tetrimino import Tetrimino
+from random import shuffle
 
 ROWS = 22 #20 for the actual well, first 2 for the buffer zone
 COLUMNS = 10 #default width
@@ -19,6 +20,10 @@ class GameState:
         self.board = [[' * ' for i in range(self.COLUMNS)] for j in range(self.ROWS)]
         self.block = None
         self.existing_blocks = [] #a list of tetromino objects
+
+        self.block_types = ['I', 'O', 'T', 'S', 'Z', 'J', 'L']
+        shuffle(self.block_types)
+        self.queue = self.block_types[:]
 
     def block_pieces(self) -> {str:[int, int]}:
         '''
@@ -67,10 +72,39 @@ class GameState:
         return   '\n'.join([ ''.join([self.board[i][j] for j in range(len(self.board[i]))]) for i in range(len(self.board)) ])
 
     def spawn(self):
+        '''
+        initialize object
+
+        if there is more than 0 blocks in queue, initialize block to the first type in the queue
+        delete the first type on the queue 
+        initialize the tetrimino to those coordinates
+        append the mino to existing blocks
+
+        '''
+        self.block = Tetrimino()
+
+        
+        
+        if len(self.queue) > 0:
+            self.block.set_type(self.queue[0])
+            del self.queue[0]
+            self.block.spawn()
+            self.existing_blocks.append(self.block)
+        else:
+            shuffle(self.block_types)
+            self.queue = self.block_types[:]
+            self.block.set_type(self.queue[0])
+            del self.queue[0]
+            self.block.spawn()
+            self.existing_blocks.append(self.block)
+
+    '''
+    def spawn(self):
         #initializes random Tetrimino object
         self.block = Tetrimino()
         self.existing_blocks.append(self.block)
         self.block.spawn()
+    '''
 
     def test_spawn(self, type_str):
         #initializes custom Tetrimino object
@@ -186,6 +220,8 @@ class GameState:
                 self.block.frozen = True
                 self.block.blocks = current_pos
                 break
+
+            print(hard_drop)
         else:
             self.block.landed = True
             self.block.frozen = True
