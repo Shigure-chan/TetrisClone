@@ -25,6 +25,8 @@ class GameState:
         shuffle(self.block_types)
         self.queue = self.block_types[:]
 
+        self.hold_queue = [] #this should be empty most of the time...
+
     def block_pieces(self) -> {str:[int, int]}:
         '''
         returns a dict of the coordinates for easy access
@@ -50,18 +52,6 @@ class GameState:
         '''
         self.existing_blocks = [block for block in self.existing_blocks if len(block.blocks) != 0]
         
-
-    def board_config(self, columns, rows):
-        #board_config(15, 10)
-
-        #Assertion errors are raised so somebody doesn't try to make a board with negative rows and columns...
-        assert type(columns) == int and columns >= 4, ('GameState.board_config: columns({}) is not a int that is at least 4'.format(columns))
-        assert type(rows) == int and rows >= 4, ('GameState.board_config: rows({}) is not a int that is at least 4'.format(rows))
-        self.COLUMNS = columns
-        self.ROWS = rows
-        
-        self.board = [[' * ' for i in range(self.COLUMNS)] for j in range(ROWS)]
-    
     def printout(self) -> str:
         '''
         creates a string representation of the board
@@ -70,41 +60,78 @@ class GameState:
         
         '''
         return   '\n'.join([ ''.join([self.board[i][j] for j in range(len(self.board[i]))]) for i in range(len(self.board)) ])
+    
+    def ghost_printout(self):
+        field = [[self.board[i][j] for j in range(len(self.board[i]))] for i in range(len(self.board)) ]
+
+        print(self.hard_drop_coords())
+
+        for j,k in self.hard_drop_coords().values():
+            field[j][k] = '({})'.format(self.block.block_type)
+
+        return '\n'.join([ ''.join([field[i][j] for j in range(len(field[i]))]) for i in range(len(field)) ]) 
 
     def spawn(self):
         '''
-        initialize object
-
-        if there is more than 0 blocks in queue, initialize block to the first type in the queue
-        delete the first type on the queue 
-        initialize the tetrimino to those coordinates
-        append the mino to existing blocks
+        -initializes a tetrimino
+        -sets it to the first type in the queue
+        -spawns the block on the board
+        -adds the block to the list of existing blocks
+        -deletes the first type and appends it to the queue
 
         '''
         self.block = Tetrimino()
 
-        
-        
-        if len(self.queue) > 0:
-            self.block.set_type(self.queue[0])
-            del self.queue[0]
-            self.block.spawn()
-            self.existing_blocks.append(self.block)
-        else:
-            shuffle(self.block_types)
-            self.queue = self.block_types[:]
-            self.block.set_type(self.queue[0])
-            del self.queue[0]
-            self.block.spawn()
-            self.existing_blocks.append(self.block)
+        current_type = self.queue[0]
 
-    '''
-    def spawn(self):
-        #initializes random Tetrimino object
-        self.block = Tetrimino()
-        self.existing_blocks.append(self.block)
+        self.block.set_type(current_type)
+        
         self.block.spawn()
-    '''
+        self.existing_blocks.append(self.block)
+
+        del self.queue[0]
+        self.queue.append(current_type)
+    
+    def hold(self):
+        '''
+        We check first to see if we have a current block and the hold_queue is empty and that the block we want to hold is not frozen
+
+        If true, we do the rest of this method...
+        We add the current block type to the the hold queue and delete the current block from the existing blocks
+        
+        '''
+        if self.block and len(self.hold_queue) == 0 and not self.block.frozen:  
+            self.hold_queue.append(self.block.block_type)
+        
+            for i in range(len(self.existing_blocks[:])):
+                if self.block == self.existing_blocks[i]:
+                    del self.existing_blocks[i]
+
+            self.queue.insert(1, self.hold_queue[0]) #1 is blcok 2 in the queue
+    
+    def clear_hold_queue(self):
+        '''
+        Automatically clears hold_queue when a block is spawned
+        '''
+        if self.block.block_type in self.hold_queue:
+            del self.hold_queue[0]
+
+
+
+
+
+    def print_queue(self) -> [str]:
+        '''
+        prints the next six blocks
+        '''
+        return self.queue[1:]
+    
+    def print_hold_queue(self) -> list:
+        '''
+        prints the hold queue
+        '''
+        return self.hold_queue
+
 
     def test_spawn(self, type_str):
         #initializes custom Tetrimino object
@@ -135,7 +162,6 @@ class GameState:
                         
                     elif i.landed == True and i.frozen == True:
                         self.board[j][k] = ' {} '.format(i.block_type)
-
 
     def move_right(self):
         '''
@@ -198,6 +224,22 @@ class GameState:
                 if self.nothing_below():
                     self.block.fall_down()
     
+    def hard_drop_coords(self):
+        block_coords = self.block.blocks.copy()
+        bottom_value = max([i[0] for i in block_coords.values()])
+
+        for i in range(1, 22 - bottom_value):
+            
+            hard_drop = {block: [block_coords[block][0] + i, block_coords[block][1]] for block in block_coords}
+            current_pos = {i: [hard_drop[i][0] - 1, hard_drop[i][1] ] for i in hard_drop}
+
+            if any([self.board[x][y] != ' * ' for x,y in hard_drop.values() if [x,y] not in current_pos.values()]):
+                return current_pos
+
+        else:
+            return hard_drop
+
+    
     def hard_drop(self):
         '''
         In Tetris, we need to make blocks immediately fall down...
@@ -220,8 +262,6 @@ class GameState:
                 self.block.frozen = True
                 self.block.blocks = current_pos
                 break
-
-            print(hard_drop)
         else:
             self.block.landed = True
             self.block.frozen = True
@@ -561,13 +601,13 @@ if __name__ == '__main__':
     a = GameState()
     counter = 1
     print('State {}'.format(counter))
-    print(a.printout())
     print()
     
     while True:
         counter += 1
         print('State {}'.format(counter))
-        
+        print('Queue: {}'.format(a.print_queue()))
+        print('Hold: {}'.format(a.print_hold_queue()))
         
 
         try:
@@ -576,16 +616,21 @@ if __name__ == '__main__':
         except AssertionError:
             print('Continuing test')
         else:
+            
             if test == '>':
                 a.move_right()
                 a.board_update()
-                print(a.printout())
+                print(a.hard_drop_coords()) #test ghost block
+                #print(a.printout())
+                print(a.ghost_printout())
                 print()
                 
             elif test == '<':
                 a.move_left()
                 a.board_update()
-                print(a.printout())
+                print(a.hard_drop_coords()) #test ghost block
+                #print(a.printout())
+                print(a.ghost_printout())
                 print()
                 
             elif test.lower() == 'q':
@@ -594,7 +639,9 @@ if __name__ == '__main__':
             elif test.lower() == 's':
                 a.spawn()
                 a.board_update()
-                print(a.printout())
+                #print(a.printout())
+                print(a.ghost_printout())
+                a.clear_hold_queue()
                 print()
             
             elif test.lower() == 'ss':
@@ -612,14 +659,18 @@ if __name__ == '__main__':
                 print(a.block.blocks) #before rotation
                 a.rotation(value=-1) #revamped rotation method--this is the one that will implement wall kicking
                 a.board_update() 
-                print(a.printout())
+                print(a.hard_drop_coords()) #test ghost block
+                #print(a.printout())
+                print(a.ghost_printout())
                 print()
 
             elif test.lower() == 'r':
                 print(a.block.blocks) #before rotation
                 a.rotation(value=1) #revamped rotation method--this is the one that will implement wall kicking
-                a.board_update() 
-                print(a.printout())
+                a.board_update()
+                print(a.hard_drop_coords()) #test ghost block
+                #print(a.printout())
+                print(a.ghost_printout())
                 print()
 
             elif test == '':
@@ -627,6 +678,7 @@ if __name__ == '__main__':
                 a.gravity() #blocks fall, land, freeze
                 a.board_update() #board does any updates
                 a.mark_lines()
+                #print(a.hard_drop_coords()) #test ghost block
                 print(a.printout())
                 a.line_clear()
                 print()
@@ -637,11 +689,16 @@ if __name__ == '__main__':
                 print(a.printout())
                 print()
 
+            elif test == 'h':
+                a.hold()
+                a.board_update()
+                print(a.printout())
+                print()
+
             elif test == 'printout':
                 print(a.board)
                 print()
 
-                
         
 
         

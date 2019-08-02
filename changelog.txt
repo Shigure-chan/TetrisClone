@@ -1,13 +1,55 @@
 To-do
 
 Tetris console version:
--ghost block
--make it so that next queue can be shown in the graphical version...
 -hold queue
 -game over
 -scoring
 -high score
-=================================================================================================
+=================================================================================================================================================================================
+8/2/19
+-gamestate.py
+ -revamped spawn(self)
+  -I didn't implement the spawn system correctly.
+  -How it should work is that the game shuffles the 7 block types at the beginning
+   and spawns the first block type. Once it does that, it pushes that block type to the end of
+   the list and so on.
+
+  -initializes a tetrimino
+  -sets it to the first type in the queue
+  -spawns the block on the board
+  -adds the block to the list of existing blocks
+  -deletes the first type and appends it to the queue
+
+ -print_queue(self)
+  -returns the next six blocks as a list
+ 
+ -hold_queue(self)
+  -returns a list of a currently held block
+ 
+ -clear_hold_queue(self)
+  -clears self.hold_queue
+
+-tetrimino.py
+ -overloaded __eq__(self, other)
+  -Two Tetrimino objects are now equal to each other if they have identical coordinates
+  -This will be helpful in implementing hold--specifically deleting 
+   self.block from self.existing_blocks in gamestate.py
+
+
+ -holding implementation
+  -if the current block is not frozen and the hold queue is empty
+   -the player can hold a block
+   -this means that the block will be deleted from existing_blocks 
+    and its type will be inside the hold_queue
+   -the block that switched with the held block is the second type...
+   -after the replacement block locks or freezes, the held block is the next to spawn... 
+
+Accomplishments:
+-Spawning now works as intended
+-The queue can now be shown, so players can get an idea of the next 6 blocks
+-Hold queue and holding block mechanic implemented
+
+====================================================================================================================================================================
 8/1/19
 -added to the following modules:
  -tetrimino.py
@@ -36,11 +78,16 @@ Tetris console version:
    -When an GameState object is initialized, this now happens
     -GameState will shuffle block_types in place and initialize queue to a copy of block_types
 
+  -hard_drop_coords(self)
+   -returns coordinates of the space that a block would hard drop in
   
+  -ghost_printout(self)
+   -modifies a copy of the board and uses the values returned by hard_drop_coords() to render the silhouette
 
 Accomplishments:
 Random "bag" system
-
+Proper spawn orientation
+Ghost block
 =======================================================================================================================================================================
 7/23/19
 -added to the following modules:
