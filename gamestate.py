@@ -67,7 +67,8 @@ class GameState:
         print(self.hard_drop_coords())
 
         for j,k in self.hard_drop_coords().values():
-            field[j][k] = '({})'.format(self.block.block_type)
+            if [j,k] not in self.block.blocks.values(): #basically we should see the parts of the ghost block that are not currently occupied by the current block
+                field[j][k] = '({})'.format(self.block.block_type)
 
         return '\n'.join([ ''.join([field[i][j] for j in range(len(field[i]))]) for i in range(len(field)) ]) 
 
@@ -228,16 +229,20 @@ class GameState:
         block_coords = self.block.blocks.copy()
         bottom_value = max([i[0] for i in block_coords.values()])
 
+        hard_drop = {block: [21, block_coords[block][1]] for block in block_coords}
+        
         for i in range(1, 22 - bottom_value):
-            
             hard_drop = {block: [block_coords[block][0] + i, block_coords[block][1]] for block in block_coords}
             current_pos = {i: [hard_drop[i][0] - 1, hard_drop[i][1] ] for i in hard_drop}
+
 
             if any([self.board[x][y] != ' * ' for x,y in hard_drop.values() if [x,y] not in current_pos.values()]):
                 return current_pos
 
-        else:
-            return hard_drop
+        
+        return hard_drop
+        
+        
 
     
     def hard_drop(self):
@@ -679,7 +684,8 @@ if __name__ == '__main__':
                 a.board_update() #board does any updates
                 a.mark_lines()
                 #print(a.hard_drop_coords()) #test ghost block
-                print(a.printout())
+                #print(a.printout())
+                print(a.ghost_printout())
                 a.line_clear()
                 print()
 

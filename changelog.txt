@@ -1,10 +1,19 @@
 To-do
-
-Tetris console version:
--hold queue
 -game over
 -scoring
 -high score
+==========================================================================================================================================================
+8/17/19
+-gamestate.py
+ -hard_drop_coords(self)
+  -now defines hard_drop before returning it because sometimes the loop doesn't execute and before the hard_drop variable defined itself within the loop
+ -ghost_printout(self)
+  -before marking the spots on the board where the ghost block should occupy, we check to make sure that the minos of the current block is not occupying
+   any of the spots where the ghost block lies
+  -if a mino occupies a ghost spot, mino overrides silhouette, but player should still be able to see where their block lands...
+
+All changes implemented by Kevin Huang.
+ 
 =================================================================================================================================================================================
 8/2/19
 -gamestate.py
@@ -49,6 +58,8 @@ Accomplishments:
 -The queue can now be shown, so players can get an idea of the next 6 blocks
 -Hold queue and holding block mechanic implemented
 
+All changes implemented by Kevin Huang.
+
 ====================================================================================================================================================================
 8/1/19
 -added to the following modules:
@@ -88,6 +99,8 @@ Accomplishments:
 Random "bag" system
 Proper spawn orientation
 Ghost block
+
+All changes implemented by Kevin Huang.
 =======================================================================================================================================================================
 7/23/19
 -added to the following modules:
