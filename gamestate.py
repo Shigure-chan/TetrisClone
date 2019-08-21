@@ -27,6 +27,8 @@ class GameState:
 
         self.hold_queue = [] #this should be empty most of the time...
 
+        
+
     def block_pieces(self) -> {str:[int, int]}:
         '''
         returns a dict of the coordinates for easy access
@@ -589,12 +591,47 @@ class GameState:
         
         #print(self.existing_blocks_list())
         
-        
-
     
+    def lock_out(self):
+        '''
+        triggers when a whole tetrimino locks down above the sky line
+
+        the sky line i assume is the first two rows... so rows 1,2 or indexes 0,1
+        if the block is frozen and all coordinates are inside.. trigger gameover
+        '''
         
-                    
+        if self.block.frozen and all([i[0] in [0, 1] for i in self.block.blocks.values()]):
+            print("LOCK OUT")
+            print("GAME OVER")
+            print("end rewards...")
+            print("high score table...")
+
+            raise Exception
+
+    def block_out(self):
+        '''
+        triggers when part of a newly-generated tetrimino is blocked due to an existing block in the matrix
+
+        first, we check that a newly generated tetrimino will not be blocked,
+            the new block's coordinates will be checked
+
+            if any of those coordinates are occupied already, end game
+                otherwise handle the block like normal
+        '''
+        block_coords = self.block.blocks.values()
+
+        for j,k in block_coords:
+            if self.board[j][k] != ' * ':
+                print("BLOCK OUT")
+                print("GAME OVER")
+                print("end rewards...")
+                print("high score table...")
+        
+                raise Exception
+
                 
+                    
+
 
             
             
@@ -643,6 +680,8 @@ if __name__ == '__main__':
             
             elif test.lower() == 's':
                 a.spawn()
+                a.block_out() #tests game over possibility
+
                 a.board_update()
                 #print(a.printout())
                 print(a.ghost_printout())
@@ -687,6 +726,8 @@ if __name__ == '__main__':
                 #print(a.printout())
                 print(a.ghost_printout())
                 a.line_clear()
+
+                a.lock_out() #tests possible gameover
                 print()
 
             elif test == '^':
@@ -701,7 +742,7 @@ if __name__ == '__main__':
                 print(a.printout())
                 print()
 
-            elif test == 'printout':
+            elif test == 'p':
                 print(a.board)
                 print()
 

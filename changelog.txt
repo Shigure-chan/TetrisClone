@@ -1,7 +1,47 @@
 To-do
--game over
+-now to start working on it within either pygame or arcade libraries...
+ 
+
 -scoring
--high score
+ -relies on level...
+
+-end rewards should be triggered upon above average score or difficult level
+ -should have congratulatory message and special graphic effects
+
+-high score table should be triggered upon a high score, level, or time
+ -name, level, score, goal attained, number of lines cleared
+ -score data should be retained and accessible via main menu...
+
+
+==========================================================================================================================================================
+8/20/19
+Game Over
+
+implementation plan
+
+lock out
+-a whole tetrimino locks down above the sky line
+ 
+ the sky line i assume is the first two rows... so rows 1,2 or indexes 0,1
+ 
+ if the block is frozen and all coordinates are inside.. trigger gameover
+
+block out
+-part of a newly-generated tetrimino is blocked due to an existing block in the matrix
+
+ first, we check that a newly generated tetrimino will not be blocked,
+  the new block's coordinates will be checked
+  if any of those coordinates are occupied already, end game
+  otherwise handle the block like normal
+
+-gamestate.py
+ -lock_out
+  works exactly as described...
+
+ -block_out
+  works exactly as described
+
+
 ==========================================================================================================================================================
 8/17/19
 -gamestate.py
