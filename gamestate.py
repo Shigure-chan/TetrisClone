@@ -103,14 +103,33 @@ class GameState:
         We add the current block type to the the hold queue and delete the current block from the existing blocks
         
         '''
+        print(self.queue)
+
         if self.block and len(self.hold_queue) == 0 and not self.block.frozen:  
             self.hold_queue.append(self.block.block_type)
         
             for i in range(len(self.existing_blocks[:])):
                 if self.block == self.existing_blocks[i]:
                     del self.existing_blocks[i]
+        
+        elif self.block.block_type not in self.hold_queue and len(self.hold_queue) == 1 and not self.block.frozen:
+            #we add the new value to the hold queue
+            
+            self.hold_queue.append(self.block.block_type) 
 
-            self.queue.insert(1, self.hold_queue[0]) #1 is blcok 2 in the queue
+            #we make sure the block with the new value is deleted...
+            for i in range(len(self.existing_blocks[:])):
+                if self.block == self.existing_blocks[i]:
+                    del self.existing_blocks[i]
+            
+            self.queue.remove(self.hold_queue[0]) 
+            #we remove the first occurence of the old value held from the queue to put it at the beginning of the queue
+             #without creating a duplicate
+
+            self.queue.insert(0, self.hold_queue[0])
+            
+            del self.hold_queue[0]
+    
     
     def clear_hold_queue(self):
         '''
@@ -119,15 +138,18 @@ class GameState:
         if self.block.block_type in self.hold_queue:
             del self.hold_queue[0]
 
-
-
+    def print_next_block(self) -> str:
+        '''
+        prints ths first block in the queue
+        '''
+        return self.queue[0]
 
 
     def print_queue(self) -> [str]:
         '''
-        prints the next six blocks
+        prints the six blocks after the very next block
         '''
-        return self.queue[1:]
+        return self.queue[1:7]
     
     def print_hold_queue(self) -> list:
         '''
@@ -648,6 +670,7 @@ if __name__ == '__main__':
     while True:
         counter += 1
         print('State {}'.format(counter))
+        print('Next: {}'.format(a.print_next_block()))
         print('Queue: {}'.format(a.print_queue()))
         print('Hold: {}'.format(a.print_hold_queue()))
         
@@ -685,7 +708,7 @@ if __name__ == '__main__':
                 a.board_update()
                 #print(a.printout())
                 print(a.ghost_printout())
-                a.clear_hold_queue()
+                #a.clear_hold_queue()
                 print()
             
             elif test.lower() == 'ss':
