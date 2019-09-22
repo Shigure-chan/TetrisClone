@@ -1,6 +1,5 @@
 To-do
 -now to start working on it within either pygame or arcade libraries...
- 
 
 -scoring
  -relies on level...
@@ -11,6 +10,47 @@ To-do
 -high score table should be triggered upon a high score, level, or time
  -name, level, score, goal attained, number of lines cleared
  -score data should be retained and accessible via main menu...
+==================================================================================================================
+9/21/19
+interface.py now has a functioning title screen
+
+-Game class inherits from Arcade's Window class
+-there are "flag" attributes which dictate whether certain things need to be highlighted or which 
+ "screen" to show the player: menu, high score, options, etc.
+-the player can quit the game and go to the "game" which is currently a blank screen
+-there are three functions and one helper that help the game figure out when a cursor is inside
+ the buttons... and when each button is clicked...
+
+=======================================================================================================================================================
+8/25/19
+-revamped the following methods in gamestate.py
+ -hold(self)
+  -changed it to the behavior described below
+  -before... when you held a block, a block would go in the hold queue
+   -it would automatically spawn as the next block 
+   -maybe I should re-implement this behavior as a mode you can select or something of that nature...
+   
+-added new method
+ -print_next_block(self)
+  -returns the first item in the queue or the very next block as a string
+
+hold should acutally work like this
+
+no block in the hold queue
+-block spawns
+-hold block
+-when you hold a block, it goes into the hold queue
+-the next block spawns
+-hold can't be used again until the block freezes
+
+block in the hold queue
+-block spawns
+-hold block
+-the formerly held block spawns
+-the new blocks goes into the hold queue
+-hold can't be used again until the block freezes
+
+All changes implemented by Kevin Huang
 
 
 ==========================================================================================================================================================
