@@ -49,7 +49,7 @@ class Tetrimino():
         return f'Tetrimino({self.blocks})'
     
     def __eq__(self, other):
-        assert type(other) == Tetrimino, "Tetrimino.__eq__: other(\'{}\' is not a Tetrimino object; thus cannot be compared to a Tetrimino object)".format(other)
+        assert type(other) in [Tetrimino], "Tetrimino.__eq__: other(\'{}\' is not a Tetrimino object; thus cannot be compared to a Tetrimino object)".format(other)
         return self.blocks == other.blocks
 
     def set_type(self, type_str):

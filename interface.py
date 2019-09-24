@@ -1,4 +1,5 @@
 import arcade
+import gamestate
 
 
 TITLE = "Tetris"
@@ -19,11 +20,30 @@ INTERVAL_BETWEEN_TEXT = INTERVAL_BETWEEN_BUTTONS
 
 BACKGROUND_COLOUR = (196, 216, 237)
 BLACK = (0, 0, 0)
+
+#MENU BUTTONS
 BUTTON_BLUE = (0, 204, 255)
 BUTTON_BLUE_HIGHLIGHTED = (0, 102, 257)
+
+#MENU BUTTON TEXT
 TEXT_COLOR = BLACK
 TEXT_COLOR_HIGHLIGHTED = (255, 51, 51)
 
+#BLOCK_COLORS
+BLOCK_COLORS = {
+    'O': (255, 255, 0),  #YELLOW
+    'T': (153, 0, 153),  #PURPLE
+    'I': (0, 255, 255),  #TEAL
+    'J': (0, 51, 204),  #DARK BLUE
+    'L': (255, 153, 51),  #ORANGE
+    'S': (51, 153, 51),  #GREEN,
+    'Z': (255, 51, 0)  #RED,
+}
+
+#ACTUAL GAME
+MARGIN = 0.03
+SCORE_LEFT_BOUNDARY = 0.72
+GAP = 0.04
 
 class Game(arcade.Window):
 
@@ -44,12 +64,26 @@ class Game(arcade.Window):
         self.highlight_play = False
         self.highlight_options = False
         self.highlight_quit = False
+
+        #Game stuff
+        self.game = gamestate.GameState()
         
-
-
-
-
+        
     def on_draw(self):
+        '''
+        Functions inside
+
+        main_menu()
+            -play_button()
+            -options_button()
+            -quit_button()
+            
+        -within_game()
+            -left_edge()
+            -right_edge()
+            -top_eedge()
+            -bottom_edge()
+        '''
         arcade.start_render()
         
         #MENU
@@ -74,11 +108,11 @@ class Game(arcade.Window):
 
             def play_button(button_color, text_color):
                 arcade.draw_rectangle_filled(
-                    center_x = HORIZONTAL_CENTER, 
-                    center_y = BUTTON_TOP_COEFFICIENT * WINDOW_HEIGHT, 
-                    width = BUTTON_WIDTH_COEFFICIENT * WINDOW_WIDTH, 
-                    height = 0.1 * WINDOW_HEIGHT, 
-                    color = button_color, 
+                    center_x = HORIZONTAL_CENTER,
+                    center_y = BUTTON_TOP_COEFFICIENT * WINDOW_HEIGHT,
+                    width = BUTTON_WIDTH_COEFFICIENT * WINDOW_WIDTH,
+                    height = 0.1 * WINDOW_HEIGHT,
+                    color = button_color,
                     tilt_angle=0)
 
                 arcade.draw_text(
@@ -162,10 +196,69 @@ class Game(arcade.Window):
                 quit_button(BUTTON_BLUE, TEXT_COLOR)
     
         def within_game():
-            pass
-
-
-
+            #FIELD
+            arcade.draw_lrtb_rectangle_outline(
+                left = MARGIN * WINDOW_WIDTH,
+                right = (SCORE_LEFT_BOUNDARY - GAP) * WINDOW_WIDTH,
+                top = (1 - MARGIN) * WINDOW_HEIGHT, 
+                bottom = MARGIN * WINDOW_HEIGHT,
+                color = BLACK, 
+                border_width = 3 
+                )
+            
+            #SCORE TAB
+            arcade.draw_lrtb_rectangle_outline(
+                left = SCORE_LEFT_BOUNDARY * WINDOW_WIDTH,
+                right = (1 - MARGIN) * WINDOW_WIDTH,
+                top = (1 - MARGIN) * WINDOW_HEIGHT, 
+                bottom = MARGIN * WINDOW_HEIGHT,
+                color = BLACK, 
+                border_width = 3 
+                )
+            
+            #BLOCKS!!!!!
+            def left_edge(coords: [int, int]) -> float:
+                '''
+                returns the number needed for the left edge in arcade.draw_lrtb_rectangle_filled
+                '''
+                return (MARGIN * WINDOW_WIDTH) + ( (SCORE_LEFT_BOUNDARY - GAP - MARGIN) * ( coords[1] / 10) * WINDOW_WIDTH)
+                
+            def right_edge(coords: [int, int]) -> float:
+                '''
+                same thing as left_edge
+                '''
+                return (MARGIN * WINDOW_WIDTH) + ( (SCORE_LEFT_BOUNDARY - GAP - MARGIN) * ( (1 + coords[1]) / 10) * WINDOW_WIDTH)
+            
+            def top_edge(coords: [int, int]) -> float:
+                '''
+                same thing as left_edge
+                '''
+                return ( (1 - MARGIN) * WINDOW_HEIGHT ) - ( (1 - (2 * MARGIN)) * ((coords[0]-2) / 20) * WINDOW_HEIGHT)
+                
+            def bottom_edge(coords: [int, int]) -> float:
+                '''
+                same thing as left_edge
+                '''
+                return ( (1 - MARGIN) * WINDOW_HEIGHT ) - ( (1 - (2 * MARGIN)) * ((coords[0]-2+1) / 20) * WINDOW_HEIGHT)
+            
+            def block_render():
+                print(self.game.existing_blocks_list())
+                for i in self.game.existing_blocks:
+                    for j in i.blocks.values():
+                        if j[0] >= 2:
+                            arcade.draw_lrtb_rectangle_filled(
+                                left=left_edge(j), 
+                                right=right_edge(j), 
+                                top=top_edge(j), 
+                                bottom=bottom_edge(j), 
+                                color=BLOCK_COLORS[i.block_type]
+                                )
+            
+            block_render()
+            
+            
+            
+            
         #main_menu() function ends here
         if self.menu_flag == True and self.within_game_flag == False and self.options_flag == False:
             main_menu()
@@ -183,14 +276,42 @@ class Game(arcade.Window):
         elif within_play(x,y) and button == arcade.MOUSE_BUTTON_LEFT:
             self.menu_flag = False
             self.options_flag = False
-            self.within_play = True
+            self.game_setup()
+            self.within_game_flag = True
+
+            
+
+
+            
 
         elif within_options(x,y) and button == arcade.MOUSE_BUTTON_LEFT:
             self.menu_flag = False
-            self.within_play = False
+            self.within_game_flag = False
             self.options_flag = True
-            
     
+    def game_setup(self):
+        '''
+        Only executed once when the within_game_flag is set to true
+        '''
+        self.game.spawn()
+        self.game.board_update()
+            
+    def on_key_press(self, symbol, modifiers):
+        print(symbol)
+    
+    def on_update(self, delta_time):
+        if self.within_game_flag == True:
+            self.game.gravity() #blocks fall, land, freeze
+            self.game.board_update() #board does any updates
+            self.game.mark_lines()
+                #print(a.hard_drop_coords()) #test ghost block
+                #print(a.printout())
+            print(self.game.ghost_printout())
+            self.game.line_clear()
+        
+            if self.game.block.frozen == True:
+                self.game.spawn()
+        
             
 
     

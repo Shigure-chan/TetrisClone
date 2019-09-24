@@ -1,0 +1,9 @@
+#block displaying algorithm that's hella inefficient!!!!!!!
+            for i in range(2, len(game.board)):  #row
+                print(i, (1 - MARGIN) * WINDOW_HEIGHT, MARGIN * WINDOW_HEIGHT)
+                for j in range(len(game.board[i])): #column
+                    left = (MARGIN * WINDOW_WIDTH) + ( (SCORE_LEFT_BOUNDARY - GAP - MARGIN) * (j / 10) * WINDOW_WIDTH)
+                    right = (MARGIN * WINDOW_WIDTH) + ( (SCORE_LEFT_BOUNDARY - GAP - MARGIN) * ( (1 + j) / 10) * WINDOW_WIDTH)
+
+                    top = ( (1 - MARGIN) * WINDOW_HEIGHT ) - ( (1 - (2 * MARGIN)) * ((i-2) / 20) * WINDOW_HEIGHT)
+                    bottom = ( (1 - MARGIN) * WINDOW_HEIGHT ) - ( (1 - (2 * MARGIN)) * ((i-2+1) / 20) * WINDOW_HEIGHT)

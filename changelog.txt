@@ -11,6 +11,18 @@ To-do
  -name, level, score, goal attained, number of lines cleared
  -score data should be retained and accessible via main menu...
 ==================================================================================================================
+9/23/19
+interface.py now can render blocks...
+
+Changes needed to be implemented
+-Frame rate needs to be slower 
+-Need to implement side-to-side movement
+-Changing dimensions to look more appropriate
+-Adding freezing animations
+-Perhaps a grid for the background...
+-Queue/Hold
+
+==============================================================================================================================================
 9/21/19
 interface.py now has a functioning title screen
 
