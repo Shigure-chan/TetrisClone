@@ -21,6 +21,7 @@ Changes needed to be implemented
 -Adding freezing animations
 -Perhaps a grid for the background...
 -Queue/Hold
+-Ghost block
 
 ==============================================================================================================================================
 9/21/19
