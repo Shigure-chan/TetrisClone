@@ -11,6 +11,31 @@ To-do
  -name, level, score, goal attained, number of lines cleared
  -score data should be retained and accessible via main menu...
 ==================================================================================================================
+9/27/19
+
+Changes implemented:
+-Side-to-side movement
+-Added a grid for the background...
+-The outlines display last, so the block colors don't end up covering them
+-Slower falling
+-Soft dropping...
+
+Improvements:
+Soft dropping seems to be a little too fast... (you can't even see the block falling...)
+
+Changes that should be made...
+-Seeing the current block and the next block
+-Holding blocks
+-Ghost block
+-Changing dimensions to look more appropriate
+-Adding freezing animations
+-Score table
+
+Bug:
+Mino rotations should not be allowed if the mino in question doesn't exist...
+
+All changes made by Kevin Huang
+===================================================================================================================
 9/23/19
 interface.py now can render blocks...
 
@@ -23,6 +48,8 @@ Changes needed to be implemented
 -Queue/Hold
 -Ghost block
 
+
+All changes made by Kevin Huang
 ==============================================================================================================================================
 9/21/19
 interface.py now has a functioning title screen
@@ -34,6 +61,8 @@ interface.py now has a functioning title screen
 -there are three functions and one helper that help the game figure out when a cursor is inside
  the buttons... and when each button is clicked...
 
+
+All changes made by Kevin Huang
 =======================================================================================================================================================
 8/25/19
 -revamped the following methods in gamestate.py

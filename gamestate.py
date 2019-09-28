@@ -27,6 +27,12 @@ class GameState:
 
         self.hold_queue = [] #this should be empty most of the time...
 
+        self.player_data = {
+            'score': 0,
+            'level': 1,
+            'lines_cleared': 0
+        }
+
         
 
     def block_pieces(self) -> {str:[int, int]}:
@@ -650,6 +656,8 @@ class GameState:
                 print("high score table...")
         
                 raise Exception
+    
+    
 
                 
                     

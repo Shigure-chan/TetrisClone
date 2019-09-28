@@ -1,10 +1,11 @@
 import arcade
 import gamestate
+import numbers
 
 
 TITLE = "Tetris"
-WINDOW_WIDTH = 1200
-WINDOW_HEIGHT = 900
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 700
 
 HORIZONTAL_CENTER = 0.5 * WINDOW_WIDTH
 
@@ -33,12 +34,15 @@ TEXT_COLOR_HIGHLIGHTED = (255, 51, 51)
 BLOCK_COLORS = {
     'O': (255, 255, 0),  #YELLOW
     'T': (153, 0, 153),  #PURPLE
-    'I': (0, 255, 255),  #TEAL
+    'I': (0, 153, 204),  #TEAL
     'J': (0, 51, 204),  #DARK BLUE
     'L': (255, 153, 51),  #ORANGE
     'S': (51, 153, 51),  #GREEN,
     'Z': (255, 51, 0)  #RED,
 }
+
+#GRID_COLOR
+GRID_COLOR = (102, 102, 53) #GRAY
 
 #ACTUAL GAME
 MARGIN = 0.03
@@ -67,6 +71,13 @@ class Game(arcade.Window):
 
         #Game stuff
         self.game = gamestate.GameState()
+        self.level = self.game.player_data['level']
+        
+        self.ticks = 0 #basically a clock
+
+        self.key_down_held = False
+        self.duration = 0 #only used when holding DOWN
+        
         
         
     def on_draw(self):
@@ -92,9 +103,9 @@ class Game(arcade.Window):
             arcade.draw_text(
             text = "TETRIS", 
             start_x = 0.1 * WINDOW_WIDTH, 
-            start_y = 0.7 * WINDOW_HEIGHT,
+            start_y = 0.65 * WINDOW_HEIGHT,
             color = BLACK,
-            font_size = 200, 
+            font_size = 180, 
             width = int(0.8 * WINDOW_WIDTH),
             align = 'center', 
             font_name=('calibri', 'arial'), 
@@ -196,65 +207,106 @@ class Game(arcade.Window):
                 quit_button(BUTTON_BLUE, TEXT_COLOR)
     
         def within_game():
-            #FIELD
-            arcade.draw_lrtb_rectangle_outline(
-                left = MARGIN * WINDOW_WIDTH,
-                right = (SCORE_LEFT_BOUNDARY - GAP) * WINDOW_WIDTH,
-                top = (1 - MARGIN) * WINDOW_HEIGHT, 
-                bottom = MARGIN * WINDOW_HEIGHT,
-                color = BLACK, 
-                border_width = 3 
-                )
-            
-            #SCORE TAB
-            arcade.draw_lrtb_rectangle_outline(
-                left = SCORE_LEFT_BOUNDARY * WINDOW_WIDTH,
-                right = (1 - MARGIN) * WINDOW_WIDTH,
-                top = (1 - MARGIN) * WINDOW_HEIGHT, 
-                bottom = MARGIN * WINDOW_HEIGHT,
-                color = BLACK, 
-                border_width = 3 
-                )
+
+            def main_boxes():
+                #FIELD
+                arcade.draw_lrtb_rectangle_outline(
+                    left = MARGIN * WINDOW_WIDTH,
+                    right = (SCORE_LEFT_BOUNDARY - GAP) * WINDOW_WIDTH,
+                    top = (1 - MARGIN) * WINDOW_HEIGHT, 
+                    bottom = MARGIN * WINDOW_HEIGHT,
+                    color = BLACK, 
+                    border_width = 3 
+                    )
+                
+                #SCORE TAB
+                arcade.draw_lrtb_rectangle_outline(
+                    left = SCORE_LEFT_BOUNDARY * WINDOW_WIDTH,
+                    right = (1 - MARGIN) * WINDOW_WIDTH,
+                    top = (1 - MARGIN) * WINDOW_HEIGHT, 
+                    bottom = MARGIN * WINDOW_HEIGHT,
+                    color = BLACK, 
+                    border_width = 3 
+                    )
             
             #BLOCKS!!!!!
-            def left_edge(coords: [int, int]) -> float:
+            def left_edge(column: int) -> float:
                 '''
                 returns the number needed for the left edge in arcade.draw_lrtb_rectangle_filled
                 '''
-                return (MARGIN * WINDOW_WIDTH) + ( (SCORE_LEFT_BOUNDARY - GAP - MARGIN) * ( coords[1] / 10) * WINDOW_WIDTH)
+                return (MARGIN * WINDOW_WIDTH) + ( (SCORE_LEFT_BOUNDARY - GAP - MARGIN) * ( column / 10) * WINDOW_WIDTH)
                 
-            def right_edge(coords: [int, int]) -> float:
+            def right_edge(column: int) -> float:
                 '''
                 same thing as left_edge
                 '''
-                return (MARGIN * WINDOW_WIDTH) + ( (SCORE_LEFT_BOUNDARY - GAP - MARGIN) * ( (1 + coords[1]) / 10) * WINDOW_WIDTH)
+                return (MARGIN * WINDOW_WIDTH) + ( (SCORE_LEFT_BOUNDARY - GAP - MARGIN) * ( (1 + column) / 10) * WINDOW_WIDTH)
             
-            def top_edge(coords: [int, int]) -> float:
+            def top_edge(row: int) -> float:
                 '''
                 same thing as left_edge
                 '''
-                return ( (1 - MARGIN) * WINDOW_HEIGHT ) - ( (1 - (2 * MARGIN)) * ((coords[0]-2) / 20) * WINDOW_HEIGHT)
+                return ( (1 - MARGIN) * WINDOW_HEIGHT ) - ( (1 - (2 * MARGIN)) * ((row-2) / 20) * WINDOW_HEIGHT)
                 
-            def bottom_edge(coords: [int, int]) -> float:
+            def bottom_edge(row: int) -> float:
                 '''
                 same thing as left_edge
                 '''
-                return ( (1 - MARGIN) * WINDOW_HEIGHT ) - ( (1 - (2 * MARGIN)) * ((coords[0]-2+1) / 20) * WINDOW_HEIGHT)
+                return ( (1 - MARGIN) * WINDOW_HEIGHT ) - ( (1 - (2 * MARGIN)) * ((row-2+1) / 20) * WINDOW_HEIGHT)
             
+            def grid_render():
+                '''
+                renders the grid
+                '''
+                horizontal_grid = [(left_edge(i), (1 - MARGIN) * WINDOW_HEIGHT, MARGIN * WINDOW_HEIGHT) for i in range(1, 10)]
+                
+                for i in range(len(horizontal_grid)):
+                    arcade.draw_line(
+                        start_x=horizontal_grid[i][0],
+                        start_y=horizontal_grid[i][1],
+                        end_x=horizontal_grid[i][0],
+                        end_y=horizontal_grid[i][2],
+                        color=GRID_COLOR,
+                        line_width=1
+                    )
+                
+                vertical_grid = [(MARGIN * WINDOW_WIDTH, bottom_edge(i), (SCORE_LEFT_BOUNDARY - GAP) * WINDOW_WIDTH) for i in range(2, 21)]
+
+                for i in range(len(vertical_grid)):
+                    arcade.draw_line(
+                        start_x=vertical_grid[i][0],
+                        start_y=vertical_grid[i][1],
+                        end_x=vertical_grid[i][2],
+                        end_y=vertical_grid[i][1],
+                        color=GRID_COLOR,
+                        line_width=1
+                    )
+                
             def block_render():
-                print(self.game.existing_blocks_list())
+                '''
+                renders all blocks that currently exist in the game...
+                '''
                 for i in self.game.existing_blocks:
                     for j in i.blocks.values():
                         if j[0] >= 2:
                             arcade.draw_lrtb_rectangle_filled(
-                                left=left_edge(j), 
-                                right=right_edge(j), 
-                                top=top_edge(j), 
-                                bottom=bottom_edge(j), 
+                                left=left_edge(j[1]), 
+                                right=right_edge(j[1]), 
+                                top=top_edge(j[0]), 
+                                bottom=bottom_edge(j[0]), 
                                 color=BLOCK_COLORS[i.block_type]
                                 )
             
+            def current_block():
+                pass
+
+            def show_queue():
+                pass
+
+            
             block_render()
+            grid_render()
+            main_boxes()
             
             
             
@@ -297,21 +349,103 @@ class Game(arcade.Window):
         self.game.board_update()
             
     def on_key_press(self, symbol, modifiers):
-        print(symbol)
+        if self.within_game_flag == True:
+            if symbol == arcade.key.LEFT:
+                self.game.move_left()
+                self.game.board_update()
+            
+            if symbol == arcade.key.RIGHT:
+                self.game.move_right()
+                self.game.board_update()
+            
+            if symbol == arcade.key.L:
+                self.game.rotation(value=-1)
+                self.game.board_update()
+
+            if symbol == arcade.key.R:
+                self.game.rotation(value=1)
+                self.game.board_update()
+            
+            if symbol == arcade.key.SPACE:
+                self.game.hard_drop()
+                self.game.board_update()
+
+            if symbol == arcade.key.DOWN:
+                self.game.gravity()
+                self.game.board_update()
+                self.key_down_held = True        
+
+            #this is for debug purposes
+            if symbol == arcade.key.E:
+                if self.level < 15:
+                    self.level += 1
+                print(f"Level {self.level}")
+    
+    def on_key_release(self, symbol, modifiers):
+        if symbol == arcade.key.DOWN:
+            self.key_down_held = False
+            print(f'Duration {self.duration}')
+            self.duration = 0
+
+            
+            
+                
+                
+                
+            
+            
     
     def on_update(self, delta_time):
-        if self.within_game_flag == True:
+        def gravity():
             self.game.gravity() #blocks fall, land, freeze
             self.game.board_update() #board does any updates
             self.game.mark_lines()
-                #print(a.hard_drop_coords()) #test ghost block
-                #print(a.printout())
+            #print(a.hard_drop_coords()) #test ghost block
+            #print(a.printout())
             print(self.game.ghost_printout())
+            print()
             self.game.line_clear()
-        
+            self.game.lock_out() #we can make this far mor sophisticated but this seems like a good start.
+            
             if self.game.block.frozen == True:
                 self.game.spawn()
-        
+
+
+        if self.within_game_flag == True:
+            def block_fall():
+                '''
+                called four times a frame
+                '''
+                if self.ticks / 240 >= self.fall_speed(): 
+                    gravity()
+                    self.ticks = 0
+
+            def key_down():
+                if self.key_down_held == True:
+                    self.duration += 1
+
+                if self.duration / 240 >= self.soft_drop_speed():
+                    gravity()
+
+            self.ticks += 1
+            key_down()
+            block_fall()
+
+            self.ticks += 1
+            key_down()
+            block_fall()
+
+            self.ticks += 1
+            key_down()
+            block_fall()
+
+            self.ticks += 1
+            key_down()
+            block_fall()
+            
+            
+            
+
             
 
     
@@ -331,6 +465,18 @@ class Game(arcade.Window):
             self.highlight_quit = True
         else:
             self.highlight_quit = False
+    
+    def fall_speed(self) -> float:
+        '''
+        returns the amount of seconds it takes for a block to fall one line based on the current level
+        '''
+        return round( (0.8 - ((self.level - 1) * 0.007)) ** (self.level-1), 3)
+    
+    def soft_drop_speed(self) -> float:
+        '''
+        returns the amount of second it takes for a block to fall one line based on the current level while soft dropping
+        '''
+        return self.fall_speed() / 20
         
 
 
@@ -370,8 +516,11 @@ def within_quit(x,y) -> bool:
     height = 0.1 * WINDOW_HEIGHT
     return coordinate_generator(x,y, center_x, center_y, width, height)
 
+
+
 def main():
     window = Game(WINDOW_WIDTH, WINDOW_HEIGHT, "TETRIS")
+    
     arcade.run()
 
 
