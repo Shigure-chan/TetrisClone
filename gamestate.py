@@ -30,7 +30,9 @@ class GameState:
         self.player_data = {
             'score': 0,
             'level': 1,
-            'lines_cleared': 0
+            'time': 0,
+            'lines': 0,
+            't-spins': 0,
         }
 
         

@@ -11,6 +11,28 @@ To-do
  -name, level, score, goal attained, number of lines cleared
  -score data should be retained and accessible via main menu...
 ==================================================================================================================
+9/30/19
+
+Changes implemented...
+-Added some colors to the colors dictionary to possibly handle visual effects for blocks
+-Added some attributes to the player_data dictionary to keep track of player stats
+-Changed the layout of the board to accomodate more information on the right side of the screen...
+-Put some rendering code in the game which should show the general layout of how the queue will be positioned...
+
+Changes that should be made...
+-Seeing the current block and the next block (WIP)
+-Holding blocks
+-Ghost block
+-Adding freezing animations
+-Score table
+-Scoring/Stat-tracking...
+
+
+
+
+
+
+====================================================================================================================
 9/27/19
 
 Changes implemented:
@@ -33,6 +55,7 @@ Changes that should be made...
 
 Bug:
 Mino rotations should not be allowed if the mino in question doesn't exist...
+	-check when spawning and updatoing are supposed to happen
 
 All changes made by Kevin Huang
 ===================================================================================================================
