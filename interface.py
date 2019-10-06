@@ -60,7 +60,8 @@ SCORE_LEFT_BOUNDARY = 0.50
 GAP = 0.04
 
 SCORE_MARGIN = 0.01
-SPRITE_MARGINS = 0.005
+SPRITE_MARGIN = 0.005
+CURRENT_BLOCK = (102, 102, 53)
 
 class Game(arcade.Window):
 
@@ -316,58 +317,64 @@ class Game(arcade.Window):
                 
 
             def show_queue():
+                
                 score_top = (1 - MARGIN - SCORE_MARGIN) * WINDOW_HEIGHT #in px
                 score_bottom = (MARGIN + SCORE_MARGIN) * WINDOW_HEIGHT #in px
 
-                queue_portion_of_score = 0.65 #vertically
-                blocks_in_queue = 4
+                score_right = (1 - MARGIN - SCORE_MARGIN) * WINDOW_WIDTH
 
-                portion_of_score = 0.5 #horizontally
+                queue_left = (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) * WINDOW_WIDTH
 
-                queue_interval = (queue_portion_of_score * (score_top - score_bottom) ) / blocks_in_queue
+                horizontal_proportion_of_score = 0.4
+                
 
-                current_hold = 2
-                current_hold_interval = ( (1 - queue_portion_of_score) * (score_top - score_bottom) ) / current_hold
+                queue_right = queue_left + ( horizontal_proportion_of_score * (score_right - queue_left) )
+                
+                interval = (score_top - score_bottom) / 7 
 
-                #for current block and held block...
-                '''
-                arcade.draw_lrtb_rectangle_filled(
-                    left = (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) * WINDOW_WIDTH,
-                    right= ( (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) * WINDOW_WIDTH ) +  ( ( (1 - MARGIN - SCORE_MARGIN) - (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) ) * WINDOW_WIDTH) * portion_of_score,
-                    top = (1 - MARGIN - SCORE_MARGIN) * WINDOW_HEIGHT,
-                    bottom = score_bottom + ((blocks_in_queue) * queue_interval) + (SPRITE_MARGINS * WINDOW_HEIGHT),
-                    color = BLOCK_COLORS['L']
-                )
-                '''
+                #next block
+                arcade.draw_rectangle_filled(
+                        center_x = (queue_left + queue_right) / 2, 
+                        center_y = score_top - (interval * 0.5), 
+                        width = queue_right - queue_left, 
+                        height = interval, 
+                        color = CURRENT_BLOCK, 
+                        tilt_angle=0)
+                
 
-                for i in range(current_hold):
-                    arcade.draw_lrtb_rectangle_filled(
-                        left = (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) * WINDOW_WIDTH,
-                        right= ( (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) * WINDOW_WIDTH ) +  ( ( (1 - MARGIN - SCORE_MARGIN) - (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) ) * WINDOW_WIDTH) * portion_of_score,
-                        top = (1 - MARGIN - SCORE_MARGIN) * WINDOW_HEIGHT - (i * current_hold_interval),
-                        bottom = (1 - MARGIN - SCORE_MARGIN) * WINDOW_HEIGHT - ( (i + 1) * current_hold_interval) + (2 * SPRITE_MARGINS * WINDOW_HEIGHT),
-                        color = BLOCK_COLORS['L']
-
-
+                for i in range(len(self.game.queue)):
+                    texture = arcade.load_texture(
+                        file_name = self.game.queue[i] + '_block.png', 
+                        x = 0, 
+                        y = 0, 
+                        width = 0, 
+                        height = 0, 
+                        mirrored = False, 
+                        flipped= False, 
+                        scale = 1
                     )
-
-
-                #for blocks currently within queue
-                for i in range(blocks_in_queue):
-                    left = (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) * WINDOW_WIDTH
-                    right= ( (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) * WINDOW_WIDTH ) +  ( ( (1 - MARGIN - SCORE_MARGIN) - (SCORE_LEFT_BOUNDARY + SCORE_MARGIN) ) * WINDOW_WIDTH) * portion_of_score
-                    top= score_bottom + ( (i + 1) * queue_interval) - (SPRITE_MARGINS * WINDOW_HEIGHT)
-                    bottom= score_bottom + (i * queue_interval)
-                    color = GRID_COLOR
                     
-                    arcade.draw_lrtb_rectangle_filled(
-                        left=left,
-                        right=right,
-                        top=top,
-                        bottom=bottom,
-                        color=color
-                    )
+                    print(score_top - (interval * (i+1) ))
+                    
+                    arcade.draw_texture_rectangle(
+                        center_x = (queue_left + queue_right) / 2,
+                        center_y = score_top - (interval/2) - (interval  * i),
+                        width = queue_right - queue_left, 
+                        height = interval, 
+                        texture = texture, 
+                        angle = 0, 
+                        alpha= 255, 
+                        repeat_count_x = 1, 
+                        repeat_count_y = 1
+                        )
+                    
+                print()
 
+                    
+
+
+                
+                
 
             
             block_render()
